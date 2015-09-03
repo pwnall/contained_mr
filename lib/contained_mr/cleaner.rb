@@ -32,9 +32,13 @@ class ContainedMr::Cleaner
     tag_prefix = "#{@name_prefix}/"
     images = Docker::Image.all
     images.each do |image|
-      image_tags = image.info['RepoTags'] || []
-      next unless image_tags.any? { |tag| tag.start_with? tag_prefix }
-      image.delete
+      next unless image_tags = image.info['RepoTags']
+      image_tags.each do |image_tag|
+        next unless image_tag.start_with? tag_prefix
+        # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
+        tag_image = Docker::Image.new Docker.connection, 'id' => image_tag
+        tag_image.delete
+      end
     end
   end
   private :destroy_all_images!

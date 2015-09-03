@@ -5,7 +5,7 @@ class TestJob < MiniTest::Test
     @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
     @job = ContainedMr::Job.new @template, 'testjob',
-                           JSON.load(File.read('testdata/job.hello'))
+                                JSON.load(File.read('testdata/job.hello'))
   end
 
   def teardown
@@ -145,7 +145,42 @@ class TestJob < MiniTest::Test
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @job.mapper_image_tag
     end
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get @job.reducer_image_tag
+    end
+  end
 
+  def test_destroy_with_two_jobs
+    @job.build_mapper_image File.read('testdata/input.hello')
+    1.upto(3) { |i| @job.run_mapper i }
+    @job.build_reducer_image
+
+    job2 = ContainedMr::Job.new @template, 'testjob2',
+                                JSON.load(File.read('testdata/job.hello'))
+    job2.build_mapper_image File.read('testdata/input.hello')
+    1.upto(3) { |i| job2.run_mapper i }
+    job2.build_reducer_image
+
+    job2.destroy!
+
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get job2.mapper_image_tag
+    end
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get job2.reducer_image_tag
+    end
+
+    image = Docker::Image.get @job.mapper_image_tag
+    assert image, "destroy! wiped the other job's mapper image"
+
+    image = Docker::Image.get @job.reducer_image_tag
+    assert image, "destroy! wiped the other job's reducer image"
+
+    @job.destroy!
+
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get @job.mapper_image_tag
+    end
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @job.reducer_image_tag
     end

@@ -47,4 +47,22 @@ class TestTemplate < MiniTest::Test
       Docker::Image.get @template.image_tag
     end
   end
+
+  def test_destory_with_two_templates
+    template2 = ContainedMr::Template.new 'contained_mrtests', 'hello2',
+        StringIO.new(File.binread('testdata/hello.zip'))
+
+    template2.destroy!
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get template2.image_tag
+    end
+
+    image = Docker::Image.get @template.image_tag
+    assert image, "destroy! wiped the other template's image"
+
+    @template.destroy!
+    assert_raises Docker::Error::NotFoundError do
+      Docker::Image.get @template.image_tag
+    end
+  end
 end

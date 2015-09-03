@@ -33,7 +33,8 @@ class ContainedMr::Template
   # This removes the template's base Docker image.
   def destroy!
     unless @image_id.nil?
-      image = Docker::Image.get @image_id
+      # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
+      image = Docker::Image.new Docker.connection, 'id' => image_tag
       image.remove
       @image_id = nil
     end

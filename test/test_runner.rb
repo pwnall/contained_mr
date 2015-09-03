@@ -5,7 +5,7 @@ class TestRunner < MiniTest::Test
     @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
     @job = ContainedMr::Job.new @template, 'testjob',
-                           JSON.load(File.read('testdata/job.hello'))
+                                JSON.load(File.read('testdata/job.hello'))
     @job.build_mapper_image File.read('testdata/input.hello')
   end
 
@@ -16,7 +16,7 @@ class TestRunner < MiniTest::Test
 
   def test_perform_happy_path
     runner = ContainedMr::Runner.new @job.mapper_container_options(2), 2.5,
-                                @template.mapper_output_path
+                                     @template.mapper_output_path
     runner.perform
 
     assert_equal nil, runner.container_id, 'container still running'
@@ -31,7 +31,7 @@ class TestRunner < MiniTest::Test
 
   def test_perform_exit_code
     runner = ContainedMr::Runner.new @job.mapper_container_options(3), 2.5,
-                                @template.mapper_output_path
+                                     @template.mapper_output_path
     runner.perform
 
     assert_equal nil, runner.container_id, 'container still running'
@@ -42,7 +42,7 @@ class TestRunner < MiniTest::Test
 
   def test_perform_timeout
     runner = ContainedMr::Runner.new @job.mapper_container_options(1), 2.5,
-                                @template.mapper_output_path
+                                     @template.mapper_output_path
     runner.perform
 
     assert_equal nil, runner.container_id, 'container still running'

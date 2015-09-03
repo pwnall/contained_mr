@@ -47,13 +47,15 @@ class ContainedMr::Job
     end
 
     unless @mapper_image_id.nil?
-      image = Docker::Image.get @mapper_image_id
+      # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
+      image = Docker::Image.new Docker.connection, 'id' => mapper_image_tag
       image.remove
       @mapper_image_id = nil
     end
 
     unless @reducer_image_id.nil?
-      image = Docker::Image.get @reducer_image_id
+      # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
+      image = Docker::Image.new Docker.connection, 'id' => reducer_image_tag
       image.remove
       @reducer_image_id = nil
     end

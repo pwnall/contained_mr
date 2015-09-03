@@ -37,8 +37,11 @@ Zip::File.open('testdata/hello.zip', Zip::File::CREATE) do |zip|
   files = Dir.chdir('testdata/hello') { Dir.glob('**/*') }.sort
   files.each do |file|
     path = File.join 'testdata/hello', file
-    next unless File.file?(path)
-    zip.add file, path
+    if File.directory? path
+      zip.mkdir file
+    elsif File.file? path
+      zip.add file, path
+    end
   end
 end
 

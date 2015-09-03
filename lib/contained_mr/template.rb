@@ -104,12 +104,16 @@ DOCKER_END
       Zip::File.open_buffer zip_io.read do |zip|
         zip.each do |zip_entry|
           file_name = zip_entry.name
-          if file_name == 'mapreduced.yml'
-            read_definition zip_entry.get_input_stream
-            next
-          end
-          tar.add_file file_name, 0644 do |tar_file_io|
-            IO.copy_stream zip_entry.get_input_stream, tar_file_io
+          if zip_entry.directory?
+            tar.mkdir file_name, 0755
+          elsif zip_entry.file?
+            if file_name == 'mapreduced.yml'
+              read_definition zip_entry.get_input_stream
+              next
+            end
+            tar.add_file file_name, 0644 do |tar_file_io|
+              IO.copy_stream zip_entry.get_input_stream, tar_file_io
+            end
           end
         end
       end

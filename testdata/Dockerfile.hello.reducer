@@ -1,0 +1,4 @@
+FROM contained_mrtests/base.hello
+COPY . /usr/mrd/
+WORKDIR /
+ENTRYPOINT ["/bin/sh","/usr/mrd/reducer.sh"]

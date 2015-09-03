@@ -1,0 +1,10 @@
+{
+  "mapper": {
+    "wait_time": 2.5,
+    "ulimits": { "cpu": 3, "rss": 1000000 }
+  },
+  "reducer": {
+    "wait_time": 2,
+    "ulimits": { "cpu": 2, "rss": 100000 }
+  }
+}

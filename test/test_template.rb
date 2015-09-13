@@ -17,6 +17,8 @@ class TestTemplate < MiniTest::Test
   end
 
   def test_image_tag
+    assert_equal 'contained_mrtests', @template.name_prefix
+    assert_equal 'hello', @template.id
     assert_equal 'contained_mrtests/base.hello', @template.image_tag
   end
 
@@ -42,7 +44,7 @@ class TestTemplate < MiniTest::Test
   end
 
   def test_destroy
-    @template.destroy!
+    assert_equal @template, @template.destroy!
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @template.image_tag
     end
@@ -52,7 +54,7 @@ class TestTemplate < MiniTest::Test
     template2 = ContainedMr::Template.new 'contained_mrtests', 'hello2',
         StringIO.new(File.binread('testdata/hello.zip'))
 
-    template2.destroy!
+    assert_equal template2, template2.destroy!
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get template2.image_tag
     end
@@ -60,7 +62,7 @@ class TestTemplate < MiniTest::Test
     image = Docker::Image.get @template.image_tag
     assert image, "destroy! wiped the other template's image"
 
-    @template.destroy!
+    assert_equal @template, @template.destroy!
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @template.image_tag
     end

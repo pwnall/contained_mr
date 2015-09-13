@@ -1,4 +1,5 @@
 require 'helper'
+require_relative 'concerns/job_state_cases.rb'
 
 class TestJob < MiniTest::Test
   def setup
@@ -14,6 +15,11 @@ class TestJob < MiniTest::Test
   end
 
   def test_mapper_container_options
+    assert_equal @template, @job.template
+    assert_equal 'contained_mrtests', @job.name_prefix
+    assert_equal 'testjob', @job.id
+    assert_equal 3, @job.item_count
+
     @job.build_mapper_image File.read('testdata/input.hello')
 
     golden = {
@@ -65,8 +71,9 @@ class TestJob < MiniTest::Test
 
   def test_run_mapper_stderr
     @job.build_mapper_image File.read('testdata/input.hello')
-    @job.run_mapper 2
+    runner = @job.run_mapper 2
 
+    assert_equal runner, @job.mapper_runner(2), 'mapper_runner return'
     assert_nil @job.mapper_runner(1), 'Mapper 1 started prematurely'
     assert_nil @job.mapper_runner(3), 'Mapper 3 started prematurely'
     assert_nil @job.reducer_runner, 'Reducer started prematurely'
@@ -114,7 +121,7 @@ class TestJob < MiniTest::Test
     @job.build_reducer_image
     reducer = @job.run_reducer
 
-    assert @job.reducer_runner, 'reducer_runner return'
+    assert_equal reducer, @job.reducer_runner, 'reducer_runner return'
     assert_equal "3 /\n", reducer.stderr, 'Stderr: $ITEMS + $PWD'
 
     output_gold = "1\n2\n3\n" +
@@ -140,7 +147,7 @@ class TestJob < MiniTest::Test
     1.upto(3) { |i| @job.run_mapper i }
     @job.build_reducer_image
 
-    @job.destroy!
+    assert_equal @job, @job.destroy!
 
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @job.mapper_image_tag
@@ -161,7 +168,7 @@ class TestJob < MiniTest::Test
     1.upto(3) { |i| job2.run_mapper i }
     job2.build_reducer_image
 
-    job2.destroy!
+    assert_equal job2, job2.destroy!
 
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get job2.mapper_image_tag
@@ -176,7 +183,7 @@ class TestJob < MiniTest::Test
     image = Docker::Image.get @job.reducer_image_tag
     assert image, "destroy! wiped the other job's reducer image"
 
-    @job.destroy!
+    assert_equal @job, @job.destroy!
 
     assert_raises Docker::Error::NotFoundError do
       Docker::Image.get @job.mapper_image_tag
@@ -185,4 +192,6 @@ class TestJob < MiniTest::Test
       Docker::Image.get @job.reducer_image_tag
     end
   end
+
+  include JobStateCases
 end

@@ -5,11 +5,36 @@ require 'docker'
 
 # Handles running a single mapper or reducer.
 class ContainedMr::Runner
-  attr_reader :container_id
-  attr_reader :started_at, :ended_at, :status_code, :timed_out
-  attr_reader :stdout, :stderr, :output
+  # @return {Time} the time when the mapper or reducer starts running
+  attr_reader :started_at
+  # @return {Time} the time when the mapper or reducer stops running or is killed
+  attr_reader :ended_at
+  # @return {Number} the time
+  attr_reader :status_code
+  # @return {Boolean} true if the mapper or reducer was terminated due to
+  #   running for too long
+  attr_reader :timed_out
 
-  # C
+  # @return {String} the data written by the mapper or reducer to stdout
+  attr_reader :stdout
+  # @return {String} the data written by the mapper or reducer to stderr
+  attr_reader :stderr
+  # @return {String} the contents of the file
+  attr_reader :output
+
+  # @return {String} the UID
+  attr_reader :container_id
+
+  include ContainedMr::RunnerLogic
+
+  # Initialize a runner.
+  #
+  # @param {Hash<String, Object>} docker container creation options, passed to
+  #   {Docker::Container.create} without modification
+  # @param {Number} time_limit maximum number of seconds that the runner's
+  #   container is allowed to execute before being terminated
+  # @param {String} output_path the location of the file inside the container
+  #   whose output will be saved
   def initialize(container_options, time_limit, output_path)
     @container_options = container_options
     @time_limit = time_limit
@@ -23,8 +48,9 @@ class ContainedMr::Runner
     @output = nil
   end
 
-
   # Performs a full mapper / reducer step.
+  #
+  # @return {ContainedMr::Runner} self
   def perform
     container = create
     @container_id = container.id
@@ -32,13 +58,20 @@ class ContainedMr::Runner
     execute container
     fetch_console_output container
     fetch_file_output container
-    destroy container
-    self
+    destroy! container
   end
 
-  # @return {Number} the container's running time, in seconds
-  def ran_for
-    @started_at && @ended_at && (@ended_at - @started_at)
+  # Removes the container used to run a mapper / reducer.
+  #
+  # @param {Docker::Container} container the mapper / reducer's container;
+  # @return {ContainedMr::Runner} self
+  def destroy!(container = nil)
+    unless @container_id.nil?
+      container ||= Docker::Container.get @container_id
+      container.delete force: true
+      @container_id = nil
+    end
+    self
   end
 
   # Creates a container for running a mapper or reducer.
@@ -114,12 +147,4 @@ class ContainedMr::Runner
     tar_buffer
   end
   private :fetch_tar_output
-
-  # Removes the container used to run a mapper / reducer.
-  #
-  # @param {Docker::Container} container the mapper / reducer's container
-  def destroy(container)
-    container.delete
-    @container_id = nil
-  end
 end

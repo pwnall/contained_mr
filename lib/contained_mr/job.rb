@@ -7,7 +7,23 @@ require 'docker'
 
 # A map-reduce job.
 class ContainedMr::Job
-  attr_reader :id, :item_count, :mapper_image_id, :reducer_image_id
+  # @return {ContainedMr::Template} the template this job is derived from
+  attr_reader :template
+
+  # @return {String} prepended to Docker objects, for identification purposes
+  attr_reader :name_prefix
+
+  # @return {String} the job's unique identifier
+  attr_reader :id
+
+  # @return {Number} the number of mapper jobs that will be run
+  attr_reader :item_count
+
+  # @return {String} the unique ID of the Docker image used to run the mappers
+  attr_reader :mapper_image_id
+
+  # @return {String} the unique ID of the Docker image used to run the reducer
+  attr_reader :reducer_image_id
 
   # Sets up the job.
   #
@@ -15,8 +31,8 @@ class ContainedMr::Job
   # @param {String} id the job's unique ID
   # @param {Hash<String, Object>} json_options job options, extracted from JSON
   def initialize(template, id, json_options)
-    @id = id
     @template = template
+    @id = id
     @name_prefix = template.name_prefix
     @item_count = template.item_count
 
@@ -34,17 +50,13 @@ class ContainedMr::Job
   #
   # This removes the job's containers, as well as the mapper and reducer Docker
   # images, if they still exist.
+  #
+  # @return {ContainedMr::Job} self
   def destroy!
-    @mappers.each do |runner|
-      next if runner.nil? or runner.container_id.nil?
-      container = Docker::Container.get runner.container_id
-      container.delete force: true
+    @mappers.each do |mapper|
+      mapper.destroy! unless mapper.nil?
     end
-
-    unless @reducer.nil? or @reducer.container_id.nil?
-      container = Docker::Container.get @reducer.container_id
-      container.delete force: true
-    end
+    @reducer.destroy! unless @reducer.nil?
 
     unless @mapper_image_id.nil?
       # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
@@ -59,6 +71,8 @@ class ContainedMr::Job
       image.remove
       @reducer_image_id = nil
     end
+
+    self
   end
 
   # Returns the runner used for a mapper.
@@ -67,6 +81,9 @@ class ContainedMr::Job
   # @return {ContainedMr::Runner} the runner used for the given mapper; nil if
   #   the given mapper was not started
   def mapper_runner(i)
+    if i < 1 || i > @item_count
+      raise ArgumentError, "Invalid mapper number #{i}"
+    end
     @mappers[i - 1]
   end
 
@@ -83,6 +100,10 @@ class ContainedMr::Job
   # @param {String} mapper_input data passed to the mappers
   # @return {String} the newly built Docker image's ID
   def build_mapper_image(mapper_input)
+    unless @mapper_image_id.nil?
+      raise RuntimeError, 'Mapper image already exists'
+    end
+
     tar_io = mapper_tar_context mapper_input
     image = Docker::Image.build_from_tar tar_io, t: mapper_image_tag
     @mapper_image_id = image.id
@@ -92,6 +113,13 @@ class ContainedMr::Job
   #
   # @return {String} the newly built Docker image's ID
   def build_reducer_image
+    unless @reducer_image_id.nil?
+      raise RuntimeError, 'Reducer image already exists'
+    end
+    1.upto @item_count do |i|
+      raise RuntimeError, 'Not all mappers ran' if mapper_runner(i).nil?
+    end
+
     tar_io = reducer_tar_context
     image = Docker::Image.build_from_tar tar_io, t: reducer_image_tag
     @reducer_image_id = image.id
@@ -102,6 +130,11 @@ class ContainedMr::Job
   # @param {Number} i the mapper to run
   # @return {ContainedMr::Runner} the runner used by the mapper
   def run_mapper(i)
+    if i < 1 || i > @item_count
+      raise ArgumentError, "Invalid mapper number #{i}"
+    end
+    raise RuntimeError, 'Mapper image does not exist' if @mapper_image_id.nil?
+
     mapper = ContainedMr::Runner.new mapper_container_options(i),
         @mapper_options[:wait_time], @template.mapper_output_path
     @mappers[i - 1] = mapper
@@ -112,6 +145,10 @@ class ContainedMr::Job
   #
   # @return {ContainedMr::Runner} the runner used by the reducer
   def run_reducer
+    if @reducer_image_id.nil?
+      raise RuntimeError, 'Reducer image does not exist'
+    end
+
     reducer = ContainedMr::Runner.new reducer_container_options,
         @reducer_options[:wait_time], @template.reducer_output_path
     @reducer = reducer
@@ -223,12 +260,9 @@ class ContainedMr::Job
         tar.add_file("#{i}.stdout", 0644) { |io| io.write mapper.stdout }
         tar.add_file("#{i}.stderr", 0644) { |io| io.write mapper.stderr }
 
-        status = {
-          ran_for: mapper.ran_for,
-          exit_code: mapper.status_code,
-          timed_out: mapper.timed_out,
-        }
-        tar.add_file("#{i}.json", 0644) { |io| io.write status.to_json }
+        tar.add_file("#{i}.json", 0644) do |io|
+          io.write mapper.json_file.to_json
+        end
       end
     end
     tar_buffer.rewind

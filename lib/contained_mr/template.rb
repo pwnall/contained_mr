@@ -7,13 +7,24 @@ require 'zip'
 
 # A template is used to spawn multiple Map-Reduce jobs.
 class ContainedMr::Template
-  attr_reader :name_prefix, :item_count, :image_id
+  # @return {String} prepended to Docker objects, for identification purposes
+  attr_reader :name_prefix
+
+  # @return {String} the template's unique identifier
+  attr_reader :id
+
+  # @return {Number} the number of mapper jobs specified by this template
+  attr_reader :item_count
+
+  # @return {String} image_id the unique ID of the Docker image used as a base
+  #   for images built by jobs derived from this template
+  attr_reader :image_id
 
   # Sets up the template and builds its Docker base image.
   #
   # @param {String} name_prefix prepended to Docker objects, for identification
   #   purposes
-  # @param {String} id the job's unique identifier
+  # @param {String} id the template's unique identifier
   # @param {String} zip_io IO implementation that produces the template .zip
   def initialize(name_prefix, id, zip_io)
     @name_prefix = name_prefix
@@ -31,6 +42,8 @@ class ContainedMr::Template
   # Tears down the template's state.
   #
   # This removes the template's base Docker image.
+  #
+  # @return {ContainedMr::Template} self
   def destroy!
     unless @image_id.nil?
       # HACK(pwnall): Trick docker-api into issuing a DELETE request by tag.
@@ -38,6 +51,7 @@ class ContainedMr::Template
       image.remove
       @image_id = nil
     end
+    self
   end
 
   # Computes the Dockerfile used to build a job's mapper image.
@@ -120,6 +134,7 @@ DOCKER_END
       end
     end
   end
+  private :process_zip
 
   # Reads the template's definition, using data at the given path.
   #
@@ -127,6 +142,7 @@ DOCKER_END
   #   containing the definition
   def read_definition(yaml_io)
     @definition = YAML.load yaml_io.read
+    @definition.freeze
 
     @item_count = @definition['items'] || 1
   end

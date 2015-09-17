@@ -89,11 +89,11 @@ class ContainedMr::Mock::Job
   # @return {ContainedMr::Mock::Runner} the runner that will be returned
   #   by {ContainedMr::Mock::Job#mapper_runner} after
   #   {ContainedMr::Mock::Job#run_mapper} completes.
-  def _mock_mapper(i)
+  def _mock_mapper_runner(i)
     if i < 1 || i > @item_count
       raise ArgumentError, "Invalid mapper number #{i}"
     end
-    @mock_mapper[i - 1]
+    @mock_mappers[i - 1]
   end
 
   # Returns the mock pretending to be the runner used for the reducer.
@@ -101,7 +101,7 @@ class ContainedMr::Mock::Job
   # @return {ContainedMr::Mock::Runner} the mock runner that will be returned
   #   by {ContainedMr::Mock::Job#reducer_runner} after
   #   {ContainedMr::Mock::Job#run_reducer} completes.
-  def _mock_reducer
+  def _mock_reducer_runner
     @mock_reducer
   end
 end

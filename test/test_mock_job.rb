@@ -34,6 +34,51 @@ class TestMockJob < MiniTest::Test
     assert_equal input, @job._mapper_input
   end
 
+  def test_run_mapper
+    @job.build_mapper_image File.read('testdata/input.hello')
+
+    mock_runner = @job._mock_mapper_runner 2
+    assert_equal nil, @job.mapper_runner(2)
+    assert_equal mock_runner, @job.run_mapper(2)
+    assert_equal mock_runner, @job.mapper_runner(2)
+  end
+
+  def test_mock_mapper_runner
+    assert_raises ArgumentError do
+      @job._mock_mapper_runner 4
+    end
+    mock_runners = (1..3).map { |i| @job._mock_mapper_runner i }
+    assert_operator mock_runners[0], :!=, mock_runners[1]
+    assert_operator mock_runners[0], :!=, mock_runners[2]
+    assert_operator mock_runners[1], :!=, mock_runners[2]
+
+    @job.build_mapper_image File.read('testdata/input.hello')
+
+    assert_equal mock_runners[0], @job.run_mapper(1)
+    assert_equal mock_runners[1], @job.run_mapper(2)
+    assert_equal mock_runners[2], @job.run_mapper(3)
+  end
+
+  def test_build_reducer_image
+    @job.build_mapper_image File.read('testdata/input.hello')
+    1.upto(3) { |i| @job.run_mapper i }
+
+    assert_equal nil, @job.reducer_image_id
+    assert_equal 'mock-job-reducer-image-id', @job.build_reducer_image
+    assert_equal 'mock-job-reducer-image-id', @job.reducer_image_id
+  end
+
+  def test_run_reducer
+    @job.build_mapper_image File.read('testdata/input.hello')
+    1.upto(3) { |i| @job.run_mapper i }
+    @job.build_reducer_image
+
+    mock_runner = @job._mock_reducer_runner
+    assert_equal nil, @job.reducer_runner
+    assert_equal mock_runner, @job.run_reducer
+    assert_equal mock_runner, @job.reducer_runner
+  end
+
   def test_destroy
     assert_equal false, @job.destroyed?
     assert_equal @job, @job.destroy!

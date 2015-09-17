@@ -25,16 +25,15 @@ class ContainedMr::Mock::Runner
     @_time_limit = time_limit
     @_output_path = output_path
 
-    @started_at = nil
-    @ended_at = nil
+    @container_id = nil
+    @started_at = @ended_at = nil
     @status_code = nil
     @timed_out = nil
-    @stdout = nil
-    @stderr = nil
+    @stdout = @stderr = nil
     @output = nil
+
     @performed = false
     @destroyed = false
-    @container_id = nil
   end
 
   # @see {ContainedMr::Runner#perform}
@@ -63,5 +62,25 @@ class ContainedMr::Mock::Runner
     @stderr = attributes[:stderr]
     @output = attributes[:output]
     self
+  end
+
+  # Convenience method for looking up an ulimit in the container options.
+  #
+  # @param {String} name the ulimit's name, such as 'cpu' or 'rss'
+  # @return {Number} the ulimit's hard and soft value, or nil if the ulimit was
+  #   not found
+  # @raise {RuntimeError} if the ulimit's hard and soft values don't match
+  def _ulimit(name)
+    return nil unless ulimits = @_container_options['Ulimits']
+
+    ulimits.each do |ulimit|
+      if ulimit['Name'] == name
+        if ulimit['Hard'] != ulimit['Soft']
+          raise RuntimeError, "Hard/soft ulimit mismatch for #{name}"
+        end
+        return ulimit['Hard']
+      end
+    end
+    nil
   end
 end

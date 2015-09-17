@@ -67,4 +67,33 @@ class TestMockRunner < MiniTest::Test
     assert_equal 'Nothing to see here', @runner.stderr
     assert_equal 'Ohai', @runner.output
   end
+
+  def test_ulimit
+    assert_equal 3, @runner._ulimit('cpu')
+    assert_equal 1000000, @runner._ulimit('rss')
+    assert_equal nil, @runner._ulimit('nothing')
+  end
+
+  def test_ulimit_with_mismatched_values
+    @container_options['Ulimits'][0]['Hard'] = 1
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal 1000000, runner._ulimit('rss')
+
+    begin
+      runner._ulimit('cpu')
+      flunk 'No exception thrown'
+    rescue RuntimeError => e
+      assert_instance_of RuntimeError, e
+      assert_equal 'Hard/soft ulimit mismatch for cpu', e.message
+    end
+  end
+
+  def test_ulimit_with_missing_ulimits_array
+    @container_options.delete 'Ulimits'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal nil, runner._ulimit('cpu')
+    assert_equal nil, runner._ulimit('rss')
+  end
 end

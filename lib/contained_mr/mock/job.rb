@@ -3,6 +3,9 @@ class ContainedMr::Mock::Job
   # @see {ContainedMr::Job}
   attr_reader :template, :id, :name_prefix, :item_count
 
+  # @return {Hash} the options provided to the Job constructor
+  attr_reader :_json_options
+
   # @return {String} the input data provided to {#build_mapper_image}
   attr_reader :_mapper_input
 
@@ -30,6 +33,7 @@ class ContainedMr::Mock::Job
     @_mapper_input = nil
 
     @destroyed = false
+    @_json_options = json_options
     parse_options json_options
 
     @mock_mappers = (1..@item_count).map do |i|

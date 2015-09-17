@@ -21,6 +21,7 @@ class TestMockJob < MiniTest::Test
     assert_equal 'testjob', @job.id
     assert_equal 3, @job.item_count
 
+    assert_equal 2.5, @job._json_options['mapper']['wait_time']
     assert_equal nil, @job._mapper_input
   end
 
@@ -41,6 +42,8 @@ class TestMockJob < MiniTest::Test
     assert_equal nil, @job.mapper_runner(2)
     assert_equal mock_runner, @job.run_mapper(2)
     assert_equal mock_runner, @job.mapper_runner(2)
+
+    assert_equal 2.5, mock_runner._time_limit
   end
 
   def test_mock_mapper_runner
@@ -77,6 +80,8 @@ class TestMockJob < MiniTest::Test
     assert_equal nil, @job.reducer_runner
     assert_equal mock_runner, @job.run_reducer
     assert_equal mock_runner, @job.reducer_runner
+
+    assert_equal 2, mock_runner._time_limit
   end
 
   def test_destroy

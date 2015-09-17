@@ -16,9 +16,9 @@ class ContainedMr::Runner
   # @param {String} output_path the location of the file inside the container
   #   whose output will be saved
   def initialize(container_options, time_limit, output_path)
-    @container_options = container_options
-    @time_limit = time_limit
-    @output_path = output_path
+    @_container_options = container_options
+    @_time_limit = time_limit
+    @_output_path = output_path
 
     @container_id = nil
     @started_at = @ended_at = nil
@@ -60,7 +60,7 @@ class ContainedMr::Runner
   #
   # @return {Docker::Container} newly created container
   def create
-    Docker::Container.create @container_options
+    Docker::Container.create @_container_options
   end
   private :create
 
@@ -71,7 +71,7 @@ class ContainedMr::Runner
     container.start
     @started_at = Time.now
     begin
-      wait_status = container.wait @time_limit
+      wait_status = container.wait @_time_limit
       @status_code = wait_status['StatusCode']
       @timed_out = false
     rescue Docker::Error::TimeoutError
@@ -122,7 +122,7 @@ class ContainedMr::Runner
   # @return {IO} an IO implementation that sources the .tar data
   def fetch_tar_output(container)
     tar_buffer = StringIO.new
-    container.copy @output_path do |data|
+    container.copy @_output_path do |data|
       tar_buffer << data
     end
     tar_buffer.rewind

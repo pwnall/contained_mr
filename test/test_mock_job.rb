@@ -20,7 +20,11 @@ class TestMockJob < MiniTest::Test
 
   def test_build_mapper_image
     input = File.read('testdata/input.hello')
-    assert_equal '', @job.build_mapper_image(input)
+
+    assert_equal nil, @job.mapper_image_id
+    assert_equal 'mock-job-mapper-image-id', @job.build_mapper_image(input)
+    assert_equal 'mock-job-mapper-image-id', @job.mapper_image_id
+
     assert_equal input, @job._mapper_input
   end
 

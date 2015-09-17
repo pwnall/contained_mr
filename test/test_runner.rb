@@ -4,8 +4,8 @@ class TestRunner < MiniTest::Test
   def setup
     @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
-    @job = ContainedMr::Job.new @template, 'testjob',
-                                JSON.load(File.read('testdata/job.hello'))
+    @job = @template.new_job 'testjob',
+        JSON.load(File.read('testdata/job.hello'))
     @job.build_mapper_image File.read('testdata/input.hello')
   end
 
@@ -44,10 +44,7 @@ class TestRunner < MiniTest::Test
     assert_equal 42, runner.status_code, 'status code'
     assert_equal false, runner.timed_out, 'timed out'
 
-    assert_equal runner.ended_at - runner.started_at,
-                 runner.json_file[:ran_for]
     assert_equal 42, runner.json_file[:exit_code]
-    assert_equal false, runner.json_file[:timed_out]
   end
 
   def test_perform_timeout
@@ -63,9 +60,6 @@ class TestRunner < MiniTest::Test
     assert_operator runner.ended_at - runner.started_at, :<, 2.8,
                     'running time'
 
-    assert_equal runner.ended_at - runner.started_at,
-                 runner.json_file[:ran_for]
-    assert_equal false, runner.json_file[:exit_code]
     assert_equal true, runner.json_file[:timed_out]
   end
 

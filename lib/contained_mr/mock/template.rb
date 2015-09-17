@@ -1,14 +1,13 @@
 # @see {ContainedMr::Template}
 class ContainedMr::Mock::Template
-  # @see {ContainedMr::Template}
-  attr_reader :name_prefix, :id, :item_count
-
   # @return {Hash<String, Object>} YAML-parsed mapreduced.yml
   attr_reader :_definition
 
   # @return {Hash<String, Symbol|String>} maps file names in the template .zip
   #   to their contents, and maps directory entries to the :directory symbol
   attr_reader :_zip_contents
+
+  include ContainedMr::TemplateLogic
 
   # @return {Boolean} true if {#destroy!} was called
   def destroyed?
@@ -19,10 +18,11 @@ class ContainedMr::Mock::Template
   def initialize(name_prefix, id, zip_io)
     @name_prefix = name_prefix
     @id = id
-    @destroyed = false
-
+    @image_id = 'mock-template-image-id'
     @item_count = nil
     @_definition = nil
+
+    @destroyed = false
     @_zip_contents = {}
 
     process_zip zip_io
@@ -32,6 +32,11 @@ class ContainedMr::Mock::Template
   def destroy!
     @destroyed = true
     self
+  end
+
+  # @see {ContainedMr::Template#new_job}
+  def job_class
+    ContainedMr::Mock::Job
   end
 
   # Reads the template .zip and parses the definition.
@@ -54,16 +59,4 @@ class ContainedMr::Mock::Template
     @_zip_contents.freeze
   end
   private :process_zip
-
-  # Reads the template's definition, using data at the given path.
-  #
-  # @param {IO} yaml_io IO implementation that produces the .yaml file
-  #   containing the definition
-  def read_definition(yaml_io)
-    @_definition = YAML.load yaml_io.read
-    @_definition.freeze
-
-    @item_count = @_definition['items'] || 1
-  end
-  private :read_definition
 end

@@ -11,36 +11,21 @@ class TestTemplate < MiniTest::Test
   end
 
   def test_image_id_matches_created_image
+    assert_equal 'contained_mrtests', @template.name_prefix
+    assert_equal 'hello', @template.id
+
     image = Docker::Image.get @template.image_tag
     assert image, 'Docker::Image'
     assert_operator image.id, :start_with?, @template.image_id
   end
 
-  def test_image_tag
-    assert_equal 'contained_mrtests', @template.name_prefix
-    assert_equal 'hello', @template.id
-    assert_equal 'contained_mrtests/base.hello', @template.image_tag
-  end
-
-  def test_dockerfiles
-    golden = File.read 'testdata/Dockerfile.hello.mapper'
-    golden.sub! 'contained_mrtests/base.hello', @template.image_id
-    assert_equal golden, @template.mapper_dockerfile, 'mapper Dockerfile'
-
-    golden = File.read 'testdata/Dockerfile.hello.reducer'
-    golden.sub! 'contained_mrtests/base.hello', @template.image_id
-    assert_equal golden, @template.reducer_dockerfile, 'reducer Dockerfile'
-  end
-
-  def test_paths
-    assert_equal '/usr/mrd/map-output', @template.mapper_output_path
-    assert_equal '/usr/mrd/reduce-output', @template.reducer_output_path
-  end
-
-  def test_envs
-    assert_equal 3, @template.item_count
-    assert_equal ['ITEM=2', 'ITEMS=3'], @template.mapper_env(2)
-    assert_equal ['ITEMS=3'], @template.reducer_env
+  def test_created_image_tags
+    images = Docker::Image.all
+    image = images.find { |i| i.id.start_with? @template.image_id }
+    assert image, 'Docker::Image in collection returned by Docker::Image.all'
+    assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
+    assert_includes image.info['RepoTags'],
+        'contained_mrtests/base.hello:latest'
   end
 
   def test_destroy

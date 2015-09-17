@@ -1,9 +1,5 @@
 # @see {ContainedMr::Runner}
 class ContainedMr::Mock::Runner
-  # @see {ContainedMr::Runner}
-  attr_reader :started_at, :ended_at, :status_code, :timed_out, :stdout,
-              :stderr, :output
-
   # @return {Hash<String, Object>} the options passed to the constructor
   attr_reader :_container_options
   # @return {Hash<String, Object>} the time limit passed to the constructor
@@ -38,16 +34,19 @@ class ContainedMr::Mock::Runner
     @output = nil
     @performed = false
     @destroyed = false
+    @container_id = nil
   end
 
   # @see {ContainedMr::Runner#perform}
   def perform
     @performed = true
+    self
   end
 
   # @see {ContainedMr::Runner#destroy!}
   def destroy!
     @destroyed = true
+    self
   end
 
   # Sets the container execution data returned by the mock.

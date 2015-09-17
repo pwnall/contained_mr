@@ -27,37 +27,20 @@ class TestMockRunner < MiniTest::Test
 
   def test_perform
     assert_equal false, @runner.performed?
-    @runner.perform
+    assert_equal @runner, @runner.perform
     assert_equal true, @runner.performed?
   end
 
   def test_destroy
     assert_equal false, @runner.destroyed?
-    @runner.destroy!
+    assert_equal @runner, @runner.destroy!
     assert_equal true, @runner.destroyed?
   end
 
-  def test_ran_for
-    assert_equal nil, @runner.ran_for
-
-    @runner._mock_set started_at: Time.now
-    assert_equal nil, @runner.ran_for
-
-    @runner._mock_set ended_at: Time.now
-    assert_equal nil, @runner.ran_for
-
-    t0 = Time.now
-    @runner._mock_set started_at: t0, ended_at: t0 + 42
-    assert_equal 42, @runner.ran_for
-  end
-
   def test_json_file
-    t0 = Time.now
-    t1 = t0 + 42
-    @runner._mock_set started_at: t0, ended_at: t1, status_code: 1,
-                      timed_out: false
+    @runner._mock_set status_code: 1, timed_out: true
 
-    golden_json = { ran_for: 42, exit_code: 1, timed_out: false }
+    golden_json = { ran_for: nil, exit_code: 1, timed_out: true }
     assert_equal golden_json, @runner.json_file
   end
 

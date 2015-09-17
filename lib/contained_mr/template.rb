@@ -7,18 +7,7 @@ require 'zip'
 
 # A template is used to spawn multiple Map-Reduce jobs.
 class ContainedMr::Template
-  # @return {String} prepended to Docker objects, for identification purposes
-  attr_reader :name_prefix
-
-  # @return {String} the template's unique identifier
-  attr_reader :id
-
-  # @return {Number} the number of mapper jobs specified by this template
-  attr_reader :item_count
-
-  # @return {String} image_id the unique ID of the Docker image used as a base
-  #   for images built by jobs derived from this template
-  attr_reader :image_id
+  include ContainedMr::TemplateLogic
 
   # Sets up the template and builds its Docker base image.
   #
@@ -30,8 +19,8 @@ class ContainedMr::Template
     @name_prefix = name_prefix
     @id = id
     @image_id = nil
-    @definition = nil
     @item_count = nil
+    @_definition = nil
 
     tar_buffer = StringIO.new
     process_zip zip_io, tar_buffer
@@ -54,60 +43,12 @@ class ContainedMr::Template
     self
   end
 
-  # Computes the Dockerfile used to build a job's mapper image.
+  # The class used by {ContainedMr::TemplateLogic#create_job}.
   #
-  # @return {String} the Dockerfile
-  def mapper_dockerfile
-    job_dockerfile @definition['mapper'] || {}, 'input'
+  # @return {Class} always {ContainedMr::Job}
+  def job_class
+    ContainedMr::Job
   end
-
-  # Computes the Dockerfile used to build a job's reducer image.
-  #
-  # @return {String} the Dockerfile
-  def reducer_dockerfile
-    job_dockerfile @definition['reducer'] || {}, '.'
-  end
-
-  # @return {String} tag applied to the template's base Docker image
-  def image_tag
-    "#{@name_prefix}/base.#{@id}"
-  end
-
-  # Computes the environment variables to be set in a mapper container.
-  #
-  # @param {Number} i the mapper number
-  # @return {Array<String>} environment variables to be set in the mapper
-  def mapper_env(i)
-    [ "ITEM=#{i}", "ITEMS=#{@item_count.to_s}" ]
-  end
-
-  # Computes the environment variables to be set in the reducer container.
-  #
-  # @return {Array<String>} environment variables to be set in the mapper
-  def reducer_env
-    [ "ITEMS=#{@item_count.to_s}" ]
-  end
-
-  # @return {String} the map output's path in the mapper Docker container
-  def mapper_output_path
-    (@definition['mapper'] || {})['output'] || '/output'
-  end
-
-  # @return {String} the reducer output's path in the reducer Docker container
-  def reducer_output_path
-    (@definition['reducer'] || {})['output'] || '/output'
-  end
-
-  # @private common code from mapper_dockerfile and reducer_dockerfile
-  def job_dockerfile(job_definition, input_source)
-    <<DOCKER_END
-FROM #{@image_id}
-COPY #{input_source} #{job_definition['input'] || '/input'}
-WORKDIR #{job_definition['chdir'] || '/'}
-ENTRYPOINT #{JSON.dump(job_definition['cmd'] || ['/bin/sh'])}
-DOCKER_END
-  end
-  private :job_dockerfile
 
   # Reads the template .zip and parses the definition.
   #
@@ -135,18 +76,6 @@ DOCKER_END
     end
   end
   private :process_zip
-
-  # Reads the template's definition, using data at the given path.
-  #
-  # @param {IO} yaml_io IO implementation that produces the .yaml file
-  #   containing the definition
-  def read_definition(yaml_io)
-    @definition = YAML.load yaml_io.read
-    @definition.freeze
-
-    @item_count = @definition['items'] || 1
-  end
-  private :read_definition
 
   # Builds the template's Docker image, using data at the given path.
   #

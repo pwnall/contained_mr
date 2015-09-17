@@ -5,8 +5,8 @@ class TestJob < MiniTest::Test
   def setup
     @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
-    @job = ContainedMr::Job.new @template, 'testjob',
-                                JSON.load(File.read('testdata/job.hello'))
+    @job = @template.new_job 'testjob',
+        JSON.load(File.read('testdata/job.hello'))
   end
 
   def teardown
@@ -14,51 +14,13 @@ class TestJob < MiniTest::Test
     @template.destroy!
   end
 
-  def test_mapper_container_options
-    assert_equal @template, @job.template
-    assert_equal 'contained_mrtests', @job.name_prefix
-    assert_equal 'testjob', @job.id
-    assert_equal 3, @job.item_count
-
-    @job.build_mapper_image File.read('testdata/input.hello')
-
-    golden = {
-      'name' => 'contained_mrtests_mapper.testjob.2',
-      'Image' => @job.mapper_image_id,
-      'Hostname' => '2.mapper',
-      'Domainname' => '',
-      'Labels' => { 'contained_mr.ctl' => 'contained_mrtests' },
-      'Env' => [ 'ITEM=2', 'ITEMS=3' ],
-      'Ulimits' => [
-        { 'Name' => 'cpu', 'Hard' => 3, 'Soft' => 3 },
-        { 'Name' => 'rss', 'Hard' => 1000000, 'Soft' => 1000000 },
-      ],
-      'NetworkDisabled' => true, 'ExposedPorts' => {},
-    }
-    assert_equal golden, @job.mapper_container_options(2)
-  end
-
-  def test_reducer_container_options
-    golden = {
-      'name' => 'contained_mrtests_reducer.testjob',
-      'Image' => @job.mapper_image_id,
-      'Hostname' => 'reducer',
-      'Domainname' => '',
-      'Labels' => { 'contained_mr.ctl' => 'contained_mrtests' },
-      'Env' => [ 'ITEMS=3' ],
-      'Ulimits' => [
-        { 'Name' => 'cpu', 'Hard' => 2, 'Soft' => 2 },
-        { 'Name' => 'rss', 'Hard' => 100000, 'Soft' => 100000 },
-      ],
-      'NetworkDisabled' => true, 'ExposedPorts' => {},
-    }
-    assert_equal golden, @job.reducer_container_options
-  end
-
   def test_build_mapper_image
     assert_equal 'contained_mrtests/mapper.testjob', @job.mapper_image_tag
 
-    @job.build_mapper_image File.read('testdata/input.hello')
+    assert_equal nil, @job.mapper_image_id
+    mapper_return = @job.build_mapper_image File.read('testdata/input.hello')
+    assert_equal mapper_return, @job.mapper_image_id
+
     image = Docker::Image.get @job.mapper_image_tag
     assert image, 'Docker::Image'
     assert_operator image.id, :start_with?, @job.mapper_image_id
@@ -67,6 +29,17 @@ class TestJob < MiniTest::Test
       assert_nil @job.mapper_runner(i), "Mapper #{i} started prematurely"
     end
     assert_nil @job.reducer_runner, "Reducer started prematurely"
+  end
+
+  def test_created_mapper_image_tags
+    @job.build_mapper_image File.read('testdata/input.hello')
+
+    images = Docker::Image.all
+    image = images.find { |i| i.id.start_with? @job.mapper_image_id }
+    assert image, 'Docker::Image in collection returned by Docker::Image.all'
+    assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
+    assert_includes image.info['RepoTags'],
+        'contained_mrtests/mapper.testjob:latest'
   end
 
   def test_run_mapper_stderr
@@ -113,6 +86,13 @@ class TestJob < MiniTest::Test
     assert_operator image.id, :start_with?, @job.reducer_image_id
 
     assert_nil @job.reducer_runner, "Reducer started prematurely"
+
+    images = Docker::Image.all
+    image = images.find { |i| i.id.start_with? @job.reducer_image_id }
+    assert image, 'Docker::Image in collection returned by Docker::Image.all'
+    assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
+    assert_includes image.info['RepoTags'],
+        'contained_mrtests/reducer.testjob:latest'
   end
 
   def test_run_reducer
@@ -162,8 +142,8 @@ class TestJob < MiniTest::Test
     1.upto(3) { |i| @job.run_mapper i }
     @job.build_reducer_image
 
-    job2 = ContainedMr::Job.new @template, 'testjob2',
-                                JSON.load(File.read('testdata/job.hello'))
+    job2 = @template.new_job 'testjob2',
+        JSON.load(File.read('testdata/job.hello'))
     job2.build_mapper_image File.read('testdata/input.hello')
     1.upto(3) { |i| job2.run_mapper i }
     job2.build_reducer_image

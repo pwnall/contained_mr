@@ -5,26 +5,6 @@ require 'docker'
 
 # Handles running a single mapper or reducer.
 class ContainedMr::Runner
-  # @return {Time} the time when the mapper or reducer starts running
-  attr_reader :started_at
-  # @return {Time} the time when the mapper or reducer stops running or is killed
-  attr_reader :ended_at
-  # @return {Number} the time
-  attr_reader :status_code
-  # @return {Boolean} true if the mapper or reducer was terminated due to
-  #   running for too long
-  attr_reader :timed_out
-
-  # @return {String} the data written by the mapper or reducer to stdout
-  attr_reader :stdout
-  # @return {String} the data written by the mapper or reducer to stderr
-  attr_reader :stderr
-  # @return {String} the contents of the file
-  attr_reader :output
-
-  # @return {String} the UID
-  attr_reader :container_id
-
   include ContainedMr::RunnerLogic
 
   # Initialize a runner.
@@ -63,7 +43,9 @@ class ContainedMr::Runner
 
   # Removes the container used to run a mapper / reducer.
   #
-  # @param {Docker::Container} container the mapper / reducer's container;
+  # @param {Docker::Container} container the mapper / reducer's container; if
+  #   not supplied, an extra Docker API query is performed to obtain the
+  #   container object
   # @return {ContainedMr::Runner} self
   def destroy!(container = nil)
     unless @container_id.nil?

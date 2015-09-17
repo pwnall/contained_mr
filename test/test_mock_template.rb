@@ -11,6 +11,10 @@ class TestMockTemplate < MiniTest::Test
     assert_equal 'hello', @template.id
   end
 
+  def test_image_id
+    assert_equal 'mock-template-image-id', @template.image_id
+  end
+
   def test_definition
     assert_equal 3, @template.item_count
     assert_equal '/usr/mrd/map-output',

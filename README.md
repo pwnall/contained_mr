@@ -1,7 +1,7 @@
 # contained_mr
 
 [![Yard Docs](http://img.shields.io/badge/yard-docs-blue.svg)](http://rubydoc.info/github/pwnall/contained_mr/master/frames)
-[![Build Status](https://travis-ci.org/pwnall/seven.svg?branch=master)](https://travis-ci.org/pwnall/seven)
+[![Build Status](https://travis-ci.org/pwnall/contained_mr.svg?branch=master)](https://travis-ci.org/pwnall/contained_mr)
 
 Map-Reduce where both the mappers and the reducer run inside Docker containers.
 

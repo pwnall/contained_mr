@@ -28,7 +28,7 @@ module ContainedMr::RunnerLogic
 
   # The information written to the mapper status files given to the reducer.
   #
-  # This is saved in files named {1...n}.json provided to the reducer.
+  # This is saved in files named 1.json, 2.json, ... provided to the reducer.
   #
   # @return {Hash<Symbol, Object>} JSON-compatible representation of the
   #   runner's information

@@ -3,7 +3,7 @@ require_relative 'concerns/job_state_cases.rb'
 
 class TestJob < MiniTest::Test
   def setup
-    @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
+    @template = ContainedMr.new_template 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
     @job = @template.new_job 'testjob',
         JSON.load(File.read('testdata/job.hello'))

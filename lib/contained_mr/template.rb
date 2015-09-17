@@ -9,12 +9,7 @@ require 'zip'
 class ContainedMr::Template
   include ContainedMr::TemplateLogic
 
-  # Sets up the template and builds its Docker base image.
-  #
-  # @param {String} name_prefix prepended to Docker objects, for identification
-  #   purposes
-  # @param {String} id the template's unique identifier
-  # @param {String} zip_io IO implementation that produces the template .zip
+  # @see {ContainedMr.new_template}
   def initialize(name_prefix, id, zip_io)
     @name_prefix = name_prefix
     @id = id
@@ -43,9 +38,10 @@ class ContainedMr::Template
     self
   end
 
-  # The class used by {ContainedMr::TemplateLogic#create_job}.
+  # The class instantiated by {ContainedMr::TemplateLogic#new_job}.
   #
-  # @return {Class} always {ContainedMr::Job}
+  # @return {Class} by default {ContainedMr::Job}; tests might want to stub
+  #   this method and have it return {ContainedMr::Mock::Job}
   def job_class
     ContainedMr::Job
   end

@@ -1,0 +1,7 @@
+sudo: required
+language: ruby
+services:
+  - docker
+rvm:
+  - 2.2.3
+script: rake test

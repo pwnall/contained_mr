@@ -2,7 +2,7 @@ require 'helper'
 
 class TestCleaner < MiniTest::Test
   def setup
-    @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
+    @template = ContainedMr.new_template 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
     @job = @template.new_job 'testjob',
         JSON.load(File.read('testdata/job.hello'))
@@ -22,7 +22,7 @@ class TestCleaner < MiniTest::Test
   end
 
   def test_destroy_all_with_duplicates
-    template2 = ContainedMr::Template.new 'contained_mrtests', 'hello2',
+    template2 = ContainedMr.new_template 'contained_mrtests', 'hello2',
         StringIO.new(File.binread('testdata/hello.zip'))
     job2 = template2.new_job 'testjob2',
         JSON.load(File.read('testdata/job.hello'))

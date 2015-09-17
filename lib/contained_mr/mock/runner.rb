@@ -12,7 +12,7 @@ class ContainedMr::Mock::Runner
     @performed
   end
 
-  # @return {Boolean} true if {#destroy} was called
+  # @return {Boolean} true if {#destroy!} was called
   def destroyed?
     @destroyed
   end

@@ -2,7 +2,8 @@ require 'helper'
 
 class TestTemplateLogic < MiniTest::Test
   def setup
-    @template = ContainedMr::Mock::Template.new 'contained_mrtests', 'hello',
+    ContainedMr.stubs(:template_class).returns ContainedMr::Mock::Template
+    @template = ContainedMr.new_template 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
   end
 

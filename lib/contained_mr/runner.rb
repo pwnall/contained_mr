@@ -9,8 +9,8 @@ class ContainedMr::Runner
 
   # Initialize a runner.
   #
-  # @param {Hash<String, Object>} docker container creation options, passed to
-  #   {Docker::Container.create} without modification
+  # @param {Hash<String, Object>} container_options docker container creation
+  #   options, passed to {Docker::Container.create} without modification
   # @param {Number} time_limit maximum number of seconds that the runner's
   #   container is allowed to execute before being terminated
   # @param {String} output_path the location of the file inside the container

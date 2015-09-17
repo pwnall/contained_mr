@@ -2,7 +2,7 @@ require 'helper'
 
 class TestTemplate < MiniTest::Test
   def setup
-    @template = ContainedMr::Template.new 'contained_mrtests', 'hello',
+    @template = ContainedMr.new_template 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
   end
 
@@ -36,7 +36,7 @@ class TestTemplate < MiniTest::Test
   end
 
   def test_destory_with_two_templates
-    template2 = ContainedMr::Template.new 'contained_mrtests', 'hello2',
+    template2 = ContainedMr.new_template 'contained_mrtests', 'hello2',
         StringIO.new(File.binread('testdata/hello.zip'))
 
     assert_equal template2, template2.destroy!

@@ -3,10 +3,16 @@ require_relative 'concerns/job_state_cases.rb'
 
 class TestMockJob < MiniTest::Test
   def setup
-    @template = ContainedMr::Mock::Template.new 'contained_mrtests', 'hello',
+    ContainedMr.stubs(:template_class).returns ContainedMr::Mock::Template
+    @template = ContainedMr.new_template 'contained_mrtests', 'hello',
         StringIO.new(File.binread('testdata/hello.zip'))
     @job = ContainedMr::Mock::Job.new @template, 'testjob',
         JSON.load(File.read('testdata/job.hello'))
+  end
+
+  def test_mocking_setup
+    assert_instance_of ContainedMr::Mock::Template, @template
+    assert_instance_of ContainedMr::Mock::Job, @job
   end
 
   def test_constructor_readers

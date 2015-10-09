@@ -102,4 +102,64 @@ class TestMockRunner < MiniTest::Test
     assert_equal nil, runner._ulimit('cpu')
     assert_equal nil, runner._ulimit('rss')
   end
+
+  def test_memory_cpu_limits
+    assert_equal 256.5, @runner._ram_limit
+    assert_equal 64, @runner._swap_limit
+    assert_equal 1.5, @runner._vcpus
+  end
+
+  def test_memory_cpu_limits_without_host_config
+    @container_options.delete 'HostConfig'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal nil, runner._ram_limit
+    assert_equal nil, runner._swap_limit
+    assert_equal nil, runner._vcpus
+  end
+
+  def test_memory_cpu_limits_without_host_config_memory
+    @container_options['HostConfig'].delete 'Memory'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal nil, runner._ram_limit
+    assert_equal nil, runner._swap_limit
+    assert_equal 1.5, runner._vcpus
+  end
+
+  def test_memory_cpu_limits_without_host_config_memory_swap
+    @container_options['HostConfig'].delete 'MemorySwap'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal 256.5, runner._ram_limit
+    assert_equal nil, runner._swap_limit
+    assert_equal 1.5, runner._vcpus
+  end
+
+  def test_memory_cpu_limits_without_host_config_cpu_shares
+    @container_options['HostConfig'].delete 'CpuShares'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal 256.5, runner._ram_limit
+    assert_equal 64, runner._swap_limit
+    assert_equal nil, runner._vcpus
+  end
+
+  def test_memory_cpu_limits_without_host_config_cpu_period
+    @container_options['HostConfig'].delete 'CpuPeriod'
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal 256.5, runner._ram_limit
+    assert_equal 64, runner._swap_limit
+    assert_equal nil, runner._vcpus
+  end
+
+  def test_memory_limits_without_swap
+    @container_options['HostConfig']['MemorySwap'] = -1
+    runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
+                                           '/usr/mrd/map-output'
+    assert_equal 256.5, runner._ram_limit
+    assert_equal 0, runner._swap_limit
+    assert_equal 1.5, runner._vcpus
+  end
 end

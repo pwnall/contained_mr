@@ -83,4 +83,37 @@ class ContainedMr::Mock::Runner
     end
     nil
   end
+
+  # Convenience method for looking up the RAM limit in the container options.
+  #
+  # @return {Number} the container's RAM limit, in megabytes
+  def _ram_limit
+    return nil unless host_config = @_container_options['HostConfig']
+    return nil unless memory = host_config['Memory']
+    memory / (1024 * 1024).to_f
+  end
+
+  # Convenience method for looking up the swap limit in the container options.
+  #
+  # @return {Number} the container's swap limit, in megabytes
+  def _swap_limit
+    return nil unless host_config = @_container_options['HostConfig']
+    return nil unless memory = host_config['Memory']
+    return nil unless memory_swap = host_config['MemorySwap']
+
+    return 0 if memory_swap == -1
+    (memory_swap - memory) / (1024 * 1024).to_f
+  end
+
+  # Convenience method for looking up CPU allocation in the container options.
+  #
+  # @return {Number} the number of CPU cores allocated to the container; this
+  #   can be a fraction
+  def _vcpus
+    return nil unless host_config = @_container_options['HostConfig']
+    return nil unless period = host_config['CpuPeriod']
+    return nil unless shares = host_config['CpuShares']
+
+    shares / period.to_f
+  end
 end

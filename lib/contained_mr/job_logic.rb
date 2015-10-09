@@ -55,13 +55,17 @@ module ContainedMr::JobLogic
       { "Name" => k.to_s, "Soft" => v, "Hard" => v }
     end
 
+    env = @template.mapper_env i
+    env.push "affinity:image==#{mapper_image_tag}"
+
     {
       'name' => "#{@name_prefix}_mapper.#{@id}.#{i}",
-      'Image' => @mapper_image_id,
+      'Image' => mapper_image_tag,
       'Hostname' => "#{i}.mapper", 'Domainname' => '',
       'Labels' => { 'contained_mr.ctl' => @name_prefix },
-      'Env' => @template.mapper_env(i), 'Ulimits' => ulimits,
+      'Env' => env, 'Ulimits' => ulimits,
       'NetworkDisabled' => true, 'ExposedPorts' => {},
+      'HostConfig' => container_host_config(@mapper_options),
     }
   end
 
@@ -71,15 +75,45 @@ module ContainedMr::JobLogic
       { "Name" => k.to_s, "Soft" => v, "Hard" => v }
     end
 
+    env = @template.reducer_env
+    env.push "affinity:image==#{reducer_image_tag}"
+
     {
       'name' => "#{@name_prefix}_reducer.#{@id}",
-      'Image' => @reducer_image_id,
+      'Image' => reducer_image_tag,
       'Hostname' => 'reducer', 'Domainname' => '',
       'Labels' => { 'contained_mr.ctl' => @name_prefix },
-      'Env' => @template.reducer_env, 'Ulimits' => ulimits,
+      'Env' => env, 'Ulimits' => ulimits,
       'NetworkDisabled' => true, 'ExposedPorts' => {},
+      'HostConfig' => container_host_config(@reducer_options),
     }
   end
+
+  # Computes the value of the HostConfig key in container creation params.
+  #
+  # @param {Hash<Symbol, Object>} job_section the "mapper" or "reducer" section
+  #   in the options
+  # @return {Hash<String, Object>} a container's HostConfig params
+  def container_host_config(job_section)
+    ram_bytes = (job_section[:ram] * 1048576).to_i
+    if job_section[:swap] == 0
+      swap_bytes = -1
+    else
+      swap_bytes = (job_section[:swap] * 1048576).to_i + ram_bytes
+    end
+
+    # NOTE: The value below is 1 second, in microsecodns. This is the maximum
+    #       value, and it minimizes scheduling overheads, at the expense of
+    #       precision.
+    cpu_period = 1_000_000
+
+    {
+      'Memory' => ram_bytes, 'MemorySwap' => swap_bytes,
+      'CpuShares' => (job_section[:vcpus] * cpu_period).to_i,
+      'CpuPeriod' => cpu_period
+    }
+  end
+  private :container_host_config
 
   # Reads in JSON options and sets defaults.
   def parse_options(json_options)
@@ -87,9 +121,11 @@ module ContainedMr::JobLogic
     mapper_ulimits = mapper['ulimits'] || {}
     @mapper_options = {
       wait_time: mapper['wait_time'] || 60,
+      vcpus: mapper['vcpus'] || 1,  # logical processors
+      ram: mapper['ram'] || 512,  # megabytes
+      swap: mapper['swap'] || 0,  # megabytes
       ulimits: {
         cpu: mapper_ulimits['cpu'] || 60,  # seconds
-        rss: mapper_ulimits['rss'] || 500_000,  # pages
       }
     }
 
@@ -97,9 +133,11 @@ module ContainedMr::JobLogic
     reducer_ulimits = reducer['ulimits'] || {}
     @reducer_options = {
       wait_time: reducer['wait_time'] || 60,
+      vcpus: reducer['vcpus'] || 1,  # logical processors
+      ram: reducer['ram'] || 512,  # megabytes
+      swap: reducer['swap'] || 0,  # megabytes
       ulimits: {
         cpu: reducer_ulimits['cpu'] || 60,
-        rss: reducer_ulimits['rss'] || 500_000,
       }
     }
   end

@@ -9,6 +9,14 @@ class TestJobLogic < MiniTest::Test
         JSON.load(File.read('testdata/job.hello'))
   end
 
+  def test_mapper_image_tag
+    assert_equal 'contained_mrtests/mapper.testjob', @job.mapper_image_tag
+  end
+
+  def test_reducer_image_tag
+    assert_equal 'contained_mrtests/reducer.testjob', @job.reducer_image_tag
+  end
+
   def test_mapper_container_options
     assert_equal @template, @job.template
     assert_equal 'contained_mrtests', @job.name_prefix
@@ -19,16 +27,22 @@ class TestJobLogic < MiniTest::Test
 
     golden = {
       'name' => 'contained_mrtests_mapper.testjob.2',
-      'Image' => @job.mapper_image_id,
+      'Image' => 'contained_mrtests/mapper.testjob',
       'Hostname' => '2.mapper',
       'Domainname' => '',
       'Labels' => { 'contained_mr.ctl' => 'contained_mrtests' },
-      'Env' => [ 'ITEM=2', 'ITEMS=3' ],
+      'Env' => [ 'ITEM=2', 'ITEMS=3',
+                 'affinity:image==contained_mrtests/mapper.testjob' ],
       'Ulimits' => [
         { 'Name' => 'cpu', 'Hard' => 3, 'Soft' => 3 },
-        { 'Name' => 'rss', 'Hard' => 1000000, 'Soft' => 1000000 },
       ],
       'NetworkDisabled' => true, 'ExposedPorts' => {},
+      'HostConfig' => {
+        'Memory' => 256.5 * 1024 * 1024,
+        'MemorySwap' => (256.5 + 64) * 1024 * 1024,
+        'CpuShares' => 1500000,
+        'CpuPeriod' => 1000000,
+      },
     }
     assert_equal golden, @job.mapper_container_options(2)
   end
@@ -36,16 +50,22 @@ class TestJobLogic < MiniTest::Test
   def test_reducer_container_options
     golden = {
       'name' => 'contained_mrtests_reducer.testjob',
-      'Image' => @job.mapper_image_id,
+      'Image' => 'contained_mrtests/reducer.testjob',
       'Hostname' => 'reducer',
       'Domainname' => '',
       'Labels' => { 'contained_mr.ctl' => 'contained_mrtests' },
-      'Env' => [ 'ITEMS=3' ],
+      'Env' => [ 'ITEMS=3',
+                 'affinity:image==contained_mrtests/reducer.testjob' ],
       'Ulimits' => [
         { 'Name' => 'cpu', 'Hard' => 2, 'Soft' => 2 },
-        { 'Name' => 'rss', 'Hard' => 100000, 'Soft' => 100000 },
       ],
       'NetworkDisabled' => true, 'ExposedPorts' => {},
+      'HostConfig' => {
+        'Memory' => 768.5 * 1024 * 1024,
+        'MemorySwap' => -1,
+        'CpuShares' => 500000,
+        'CpuPeriod' => 1000000,
+      },
     }
     assert_equal golden, @job.reducer_container_options
   end

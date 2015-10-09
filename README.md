@@ -5,6 +5,35 @@
 
 Map-Reduce where both the mappers and the reducer run inside Docker containers.
 
+## Development Environment
+
+`contained-mr` requires access to a Docker daemon. The easiest way to
+bring up a development setup is to install
+[Docker Machine](https://github.com/docker/machine) and
+[VirtualBox](https://www.virtualbox.org/).
+
+The commands below install the prerequisites on OSX using
+[Homebrew](http://brew.sh/).
+
+```bash
+brew install brew-cask docker docker-machine
+brew cask install virtualbox
+```
+
+Create a Docker VM. This is a one-time setup.
+
+```bash
+docker-machine create --driver virtualbox dev
+```
+
+Set up the local environment to point to the Docker daemon in the VM. This must
+be executed in every shell where `contained-mr` is used.
+
+```bash
+eval "$(docker-machine env dev)"
+```
+
+
 ## Contributing to contained_mr
 
 * Check out the latest master to make sure the feature hasn't been implemented or the bug hasn't been fixed yet.

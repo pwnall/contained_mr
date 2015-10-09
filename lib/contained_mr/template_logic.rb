@@ -69,7 +69,7 @@ module ContainedMr::TemplateLogic
   # @private common code from mapper_dockerfile and reducer_dockerfile
   def job_dockerfile(job_definition, input_source)
     <<DOCKER_END
-FROM #{@image_id}
+FROM #{image_tag}
 COPY #{input_source} #{job_definition['input'] || '/input'}
 WORKDIR #{job_definition['chdir'] || '/'}
 ENTRYPOINT #{JSON.dump(job_definition['cmd'] || ['/bin/sh'])}

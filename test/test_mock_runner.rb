@@ -14,6 +14,12 @@ class TestMockRunner < MiniTest::Test
         { 'Name' => 'rss', 'Hard' => 1000000, 'Soft' => 1000000 },
       ],
       'NetworkDisabled' => true, 'ExposedPorts' => {},
+      'HostConfig' => {
+        'Memory' => 256.5 * 1024 * 1024,
+        'MemorySwap' => (256.5 + 64) * 1024 * 1024,
+        'CpuShares' => 1500000,
+        'CpuPeriod' => 1000000,
+      },
     }
     @runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                             '/usr/mrd/map-output'

@@ -9,7 +9,7 @@ require 'docker'
 class ContainedMr::Job
   include ContainedMr::JobLogic
 
-  # @see {ContainedMr::TemplateLogic#create_job}
+  # @see {ContainedMr::TemplateLogic#new_job}
   def initialize(template, id, json_options)
     @template = template
     @id = id

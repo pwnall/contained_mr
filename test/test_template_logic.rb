@@ -9,13 +9,11 @@ class TestTemplateLogic < MiniTest::Test
 
   def test_mapper_dockerfile
     golden = File.read 'testdata/Dockerfile.hello.mapper'
-    golden.sub! 'contained_mrtests/base.hello', 'mock-template-image-id'
     assert_equal golden, @template.mapper_dockerfile, 'mapper Dockerfile'
   end
 
   def test_reducer_dockerfile
     golden = File.read 'testdata/Dockerfile.hello.reducer'
-    golden.sub! 'contained_mrtests/base.hello', 'mock-template-image-id'
     assert_equal golden, @template.reducer_dockerfile, 'reducer Dockerfile'
   end
 

@@ -1,10 +1,16 @@
 {
   "mapper": {
     "wait_time": 2.5,
-    "ulimits": { "cpu": 3, "rss": 1000000 }
+    "vcpus": 1.5,
+    "ram": 256.5,
+    "swap": 64,
+    "ulimits": { "cpu": 3 }
   },
   "reducer": {
     "wait_time": 2,
-    "ulimits": { "cpu": 2, "rss": 100000 }
+    "vcpus": 0.5,
+    "ram": 768.5,
+    "swap": 0,
+    "ulimits": { "cpu": 2 }
   }
 }

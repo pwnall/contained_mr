@@ -7,31 +7,38 @@ Map-Reduce where both the mappers and the reducer run inside Docker containers.
 
 ## Development Environment
 
-`contained-mr` requires access to a Docker daemon. The easiest way to
+`contained-mr` requires access to a Docker Swarm daemon. The easiest way to
 bring up a development setup is to install
-[Docker Machine](https://github.com/docker/machine) and
+[Docker Machine](https://github.com/docker/machine),
+[Docker Swarm](https://github.com/docker/swarm) and
 [VirtualBox](https://www.virtualbox.org/).
 
 The commands below install the prerequisites on OSX using
 [Homebrew](http://brew.sh/).
 
 ```bash
-brew install docker docker-machine
+brew install docker docker-machine docker-swarm
 brew tap Caskroom/cask
 brew cask install virtualbox
 ```
 
-Create a Docker VM. This is a one-time setup.
+Create a Docker Swarm cluster. This is a one-time setup.
 
 ```bash
-docker-machine create --driver virtualbox --engine-storage-driver overlay dev
+TOKEN=$(docker-swarm create)
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-master --swarm-discovery "token://$TOKEN" swarm-master
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-discovery "token://$TOKEN" swarm-agent-1
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-discovery "token://$TOKEN" swarm-agent-2
 ```
 
-Set up the local environment to point to the Docker daemon in the VM. This must
-be executed in every shell where `contained-mr` is used.
+Set up the local environment to point to the Swarm master. This must be
+executed in every shell where `contained-mr` is used.
 
 ```bash
-eval "$(docker-machine env dev)"
+eval "$(docker-machine env --swarm swarm-master)"
 ```
 
 ### Cleanup
@@ -43,6 +50,29 @@ quite well in development environments.
 ```bash
 docker ps --all --quiet --no-trunc | xargs docker rm
 docker images --quiet --no-trunc | xargs docker rmi
+```
+
+### Testing Against Experimental Docker
+
+This cluster setup will use the development version of Docker.
+
+```bash
+TOKEN=$(docker-swarm create)
+ISO_URL=$(curl \
+    https://api.github.com/repos/ahbeng/boot2docker-experimental/releases/latest \
+    | grep -o https://.*/boot2docker.iso)
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-master --swarm-discovery "token://$TOKEN" \
+    --swarm-image "dockerswarm/swarm:master" \
+    --virtualbox-boot2docker-url $ISO_URL swarm-master
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-discovery "token://$TOKEN" \
+    --swarm-image "dockerswarm/swarm:master" \
+    --virtualbox-boot2docker-url $ISO_URL swarm-agent-1
+docker-machine create --driver virtualbox --engine-storage-driver overlay \
+    --swarm --swarm-discovery "token://$TOKEN" \
+    --swarm-image "dockerswarm/swarm:master" \
+    --virtualbox-boot2docker-url $ISO_URL swarm-agent-2
 ```
 
 

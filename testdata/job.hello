@@ -1,7 +1,7 @@
 {
   "mapper": {
     "wait_time": 2.5,
-    "vcpus": 1.5,
+    "vcpus": 1,
     "ram": 256.5,
     "swap": 64,
     "logs": 4.5,
@@ -9,7 +9,7 @@
   },
   "reducer": {
     "wait_time": 2,
-    "vcpus": 0.5,
+    "vcpus": 1,
     "ram": 768.5,
     "swap": 0,
     "logs": 6.5,

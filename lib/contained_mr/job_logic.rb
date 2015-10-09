@@ -108,6 +108,8 @@ module ContainedMr::JobLogic
       'MemorySwappiness' => 0,
       'CpuPeriod' => cpu_period,
       'CpuQuota' => (job_section[:vcpus] * cpu_period).to_i,
+      # NOTE: This interpretation of CpuShares only works on Docker Swarm.
+      'CpuShares' => job_section[:vcpus],
       'LogConfig' => {
         'Type' => 'json-file',
         'Config' => {

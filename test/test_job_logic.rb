@@ -41,8 +41,9 @@ class TestJobLogic < MiniTest::Test
         'Memory' => 256.5 * 1024 * 1024,
         'MemorySwap' => (256.5 + 64) * 1024 * 1024,
         'MemorySwappiness' => 0,
-        'CpuQuota' => 1500000,
+        'CpuQuota' => 1000000,
         'CpuPeriod' => 1000000,
+        'CpuShares' => 1,
         'LogConfig' => {
           'Type' => 'json-file',
           'Config' => {
@@ -72,8 +73,9 @@ class TestJobLogic < MiniTest::Test
         'Memory' => 768.5 * 1024 * 1024,
         'MemorySwap' => 768.5 * 1024 * 1024,
         'MemorySwappiness' => 0,
-        'CpuQuota' => 500000,
+        'CpuQuota' => 1000000,
         'CpuPeriod' => 1000000,
+        'CpuShares' => 1,
         'LogConfig' => {
           'Type' => 'json-file',
           'Config' => {

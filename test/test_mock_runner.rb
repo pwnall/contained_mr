@@ -18,8 +18,9 @@ class TestMockRunner < MiniTest::Test
         'Memory' => 256.5 * 1024 * 1024,
         'MemorySwap' => (256.5 + 64) * 1024 * 1024,
         'MemorySwappiness' => 0,
-        'CpuQuota' => 1500000,
+        'CpuQuota' => 1000000,
         'CpuPeriod' => 1000000,
+        'CpuShares' => 1,
         'LogConfig' => {
           'Type' => 'json-file',
           'Config' => {
@@ -114,7 +115,7 @@ class TestMockRunner < MiniTest::Test
   def test_resources
     assert_equal 256.5, @runner._ram_limit
     assert_equal 64, @runner._swap_limit
-    assert_equal 1.5, @runner._vcpus
+    assert_equal 1, @runner._vcpus
     assert_equal 4.5, @runner._logs
   end
 
@@ -134,7 +135,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal nil, runner._ram_limit
     assert_equal nil, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal 4.5, runner._logs
   end
 
@@ -144,7 +145,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal nil, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal 4.5, runner._logs
   end
 
@@ -174,7 +175,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal nil, runner._logs
   end
 
@@ -184,7 +185,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal nil, runner._logs
   end
 
@@ -194,7 +195,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal nil, runner._logs
   end
 
@@ -204,7 +205,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 0, runner._swap_limit
-    assert_equal 1.5, runner._vcpus
+    assert_equal 1, runner._vcpus
     assert_equal 4.5, runner._logs
   end
 end

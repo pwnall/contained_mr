@@ -31,6 +31,20 @@ class TestJob < MiniTest::Test
     assert_nil @job.reducer_runner, "Reducer started prematurely"
   end
 
+  def test_build_mapper_image_does_not_leak_containers
+    old_containers = Docker::Container.all(all: true)
+    @template.stubs(:mapper_dockerfile).returns(
+       "FROM contained_mrtests/base.hello\nRUN /bin/false\n")
+
+    assert_raises Docker::Error::UnexpectedResponseError do
+      @job.build_mapper_image File.read('testdata/input.hello')
+    end
+
+    assert_equal nil, @job.mapper_image_id
+    containers = Docker::Container.all(all: true)
+    assert_equal old_containers.length, containers.length
+  end
+
   def test_created_mapper_image_tags
     @job.build_mapper_image File.read('testdata/input.hello')
 
@@ -93,6 +107,23 @@ class TestJob < MiniTest::Test
     assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
     assert_includes image.info['RepoTags'],
         'contained_mrtests/reducer.testjob:latest'
+  end
+
+  def test_build_reducer_image_does_not_leak_containers
+    @job.build_mapper_image File.read('testdata/input.hello')
+    1.upto(3) { |i| @job.run_mapper i }
+
+    old_containers = Docker::Container.all(all: true)
+    @template.stubs(:reducer_dockerfile).returns(
+       "FROM contained_mrtests/base.hello\nRUN /bin/false\n")
+
+    assert_raises Docker::Error::UnexpectedResponseError do
+      @job.build_reducer_image
+    end
+
+    assert_equal nil, @job.reducer_image_id
+    containers = Docker::Container.all(all: true)
+    assert_equal old_containers.length, containers.length
   end
 
   def test_run_reducer

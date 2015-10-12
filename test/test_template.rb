@@ -35,6 +35,19 @@ class TestTemplate < MiniTest::Test
     end
   end
 
+  def test_invalid_template_does_not_leave_containers_behind
+    old_containers = Docker::Container.all(all: true)
+
+    assert_raises Docker::Error::UnexpectedResponseError do
+      template = ContainedMr.new_template 'contained_mrtests', 'invalid',
+          StringIO.new(File.binread('testdata/invalid.zip'))
+      template.destroy
+    end
+
+    containers = Docker::Container.all(all: true)
+    assert_equal old_containers.length, containers.length
+  end
+
   def test_destory_with_two_templates
     template2 = ContainedMr.new_template 'contained_mrtests', 'hello2',
         StringIO.new(File.binread('testdata/hello.zip'))

@@ -33,6 +33,17 @@ be executed in every shell where `contained-mr` is used.
 eval "$(docker-machine env dev)"
 ```
 
+### Cleanup
+
+When tests go wrong, they often leave dead containers and images behind.
+Removing all stopped containers and all unused images is a big stick that works
+quite well in development environments.
+
+```bash
+docker ps --all --quiet --no-trunc | xargs docker rm
+docker images --quiet --no-trunc | xargs docker rmi
+```
+
 
 ## Contributing to contained_mr
 

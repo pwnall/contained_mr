@@ -65,7 +65,8 @@ class ContainedMr::Job
     end
 
     tar_io = mapper_tar_context mapper_input
-    image = Docker::Image.build_from_tar tar_io, t: mapper_image_tag
+    image = Docker::Image.build_from_tar tar_io, t: mapper_image_tag,
+                                                 forcerm: 1
     @mapper_image_id = image.id
   end
 
@@ -81,7 +82,8 @@ class ContainedMr::Job
     end
 
     tar_io = reducer_tar_context
-    image = Docker::Image.build_from_tar tar_io, t: reducer_image_tag
+    image = Docker::Image.build_from_tar tar_io, t: reducer_image_tag,
+                                                 forcerm: 1
     @reducer_image_id = image.id
   end
 

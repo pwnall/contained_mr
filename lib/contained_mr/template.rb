@@ -77,7 +77,7 @@ class ContainedMr::Template
   #
   # @param {IO} tar_io IO implementation that produces the image's .tar file
   def build_image(tar_io)
-    image = Docker::Image.build_from_tar tar_io, t: image_tag
+    image = Docker::Image.build_from_tar tar_io, t: image_tag, forcerm: 1
     @image_id = image.id
   end
   private :build_image

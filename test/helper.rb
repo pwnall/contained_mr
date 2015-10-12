@@ -33,15 +33,17 @@ require 'contained_mr'
 class MiniTest::Test
 end
 
-File.unlink 'testdata/hello.zip' if File.file?('testdata/hello.zip')
-Zip::File.open('testdata/hello.zip', Zip::File::CREATE) do |zip|
-  files = Dir.chdir('testdata/hello') { Dir.glob('**/*') }.sort
-  files.each do |file|
-    path = File.join 'testdata/hello', file
-    if File.directory? path
-      zip.mkdir file
-    elsif File.file? path
-      zip.add file, path
+['hello', 'invalid'].each do |dir|
+  File.unlink "testdata/#{dir}.zip" if File.file?("testdata/#{dir}.zip")
+  Zip::File.open("testdata/#{dir}.zip", Zip::File::CREATE) do |zip|
+    files = Dir.chdir("testdata/#{dir}") { Dir.glob('**/*') }.sort
+    files.each do |file|
+      path = File.join "testdata/#{dir}", file
+      if File.directory? path
+        zip.mkdir file
+      elsif File.file? path
+        zip.add file, path
+      end
     end
   end
 end

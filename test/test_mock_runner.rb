@@ -17,7 +17,7 @@ class TestMockRunner < MiniTest::Test
       'HostConfig' => {
         'Memory' => 256.5 * 1024 * 1024,
         'MemorySwap' => (256.5 + 64) * 1024 * 1024,
-        'CpuShares' => 1500000,
+        'CpuQuota' => 1500000,
         'CpuPeriod' => 1000000,
       },
     }
@@ -137,7 +137,7 @@ class TestMockRunner < MiniTest::Test
   end
 
   def test_memory_cpu_limits_without_host_config_cpu_shares
-    @container_options['HostConfig'].delete 'CpuShares'
+    @container_options['HostConfig'].delete 'CpuQuota'
     runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit

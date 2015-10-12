@@ -109,8 +109,8 @@ module ContainedMr::JobLogic
 
     {
       'Memory' => ram_bytes, 'MemorySwap' => swap_bytes,
-      'CpuShares' => (job_section[:vcpus] * cpu_period).to_i,
-      'CpuPeriod' => cpu_period
+      'CpuPeriod' => cpu_period,
+      'CpuQuota' => (job_section[:vcpus] * cpu_period).to_i,
     }
   end
   private :container_host_config

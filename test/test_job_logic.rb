@@ -40,7 +40,7 @@ class TestJobLogic < MiniTest::Test
       'HostConfig' => {
         'Memory' => 256.5 * 1024 * 1024,
         'MemorySwap' => (256.5 + 64) * 1024 * 1024,
-        'CpuShares' => 1500000,
+        'CpuQuota' => 1500000,
         'CpuPeriod' => 1000000,
       },
     }
@@ -63,7 +63,7 @@ class TestJobLogic < MiniTest::Test
       'HostConfig' => {
         'Memory' => 768.5 * 1024 * 1024,
         'MemorySwap' => -1,
-        'CpuShares' => 500000,
+        'CpuQuota' => 500000,
         'CpuPeriod' => 1000000,
       },
     }

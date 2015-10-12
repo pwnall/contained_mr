@@ -112,8 +112,8 @@ class ContainedMr::Mock::Runner
   def _vcpus
     return nil unless host_config = @_container_options['HostConfig']
     return nil unless period = host_config['CpuPeriod']
-    return nil unless shares = host_config['CpuShares']
+    return nil unless quota = host_config['CpuQuota']
 
-    shares / period.to_f
+    quota / period.to_f
   end
 end

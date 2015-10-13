@@ -87,10 +87,28 @@ class ContainedMr::Runner
   #
   # @param {Docker::Container} container the mapper / reducer's container
   def fetch_console_output(container)
-    messages = container.attach stream: false, logs: true, stdin: nil,
-                                stdout: true, stderr: true
-    @stdout = messages[0].join ''
-    @stderr = messages[1].join ''
+    stdout_buffer = []
+    stderr_buffer = []
+    container.streaming_logs stdout: true, stderr: true,
+        since: 0, timestamps: false, tail: false do |stream, chunk|
+      case stream
+      when :stdout
+        stdout_buffer << chunk
+      when :stderr
+        stderr_buffer << chunk
+      end
+    end
+
+    @stdout = stdout_buffer.join ''
+    @stderr = stderr_buffer.join ''
+
+    # NOTE: The method below is simpler, but hangs on Swarm.
+    #       https://github.com/docker/swarm/issues/1284
+    #
+    # messages = container.attach stream: false, logs: true, stdin: nil,
+    #                             stdout: true, stderr: true
+    # @stdout = messages[0].join ''
+    # @stderr = messages[1].join ''
   end
   private :fetch_console_output
 

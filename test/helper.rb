@@ -47,5 +47,6 @@ end
     end
   end
 end
+ContainedMr::Cleaner.new('contained_mrtests').destroy_all!
 
 MiniTest.autorun

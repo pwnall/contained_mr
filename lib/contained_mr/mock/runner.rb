@@ -101,7 +101,6 @@ class ContainedMr::Mock::Runner
     return nil unless memory = host_config['Memory']
     return nil unless memory_swap = host_config['MemorySwap']
 
-    return 0 if memory_swap == -1
     (memory_swap - memory) / (1024 * 1024).to_f
   end
 
@@ -115,5 +114,17 @@ class ContainedMr::Mock::Runner
     return nil unless quota = host_config['CpuQuota']
 
     quota / period.to_f
+  end
+
+  # Convenience method for looking up the log size limit in container options.
+  #
+  # @return {Number} the container's log limit, in megabytes
+  def _logs
+    return nil unless host_config = @_container_options['HostConfig']
+    return nil unless log_config = host_config['LogConfig']
+    return nil unless config = log_config['Config']
+    return nil unless max_size = config['max-size']
+
+    max_size.to_i / (1024 * 1024).to_f
   end
 end

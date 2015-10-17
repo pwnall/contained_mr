@@ -4,6 +4,7 @@
     "vcpus": 1.5,
     "ram": 256.5,
     "swap": 64,
+    "logs": 4.5,
     "ulimits": { "cpu": 3 }
   },
   "reducer": {
@@ -11,6 +12,7 @@
     "vcpus": 0.5,
     "ram": 768.5,
     "swap": 0,
+    "logs": 6.5,
     "ulimits": { "cpu": 2 }
   }
 }

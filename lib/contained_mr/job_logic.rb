@@ -96,11 +96,7 @@ module ContainedMr::JobLogic
   # @return {Hash<String, Object>} a container's HostConfig params
   def container_host_config(job_section)
     ram_bytes = (job_section[:ram] * 1048576).to_i
-    if job_section[:swap] == 0
-      swap_bytes = -1
-    else
-      swap_bytes = (job_section[:swap] * 1048576).to_i + ram_bytes
-    end
+    swap_bytes = (job_section[:swap] * 1048576).to_i + ram_bytes
 
     # NOTE: The value below is 1 second, in microsecodns. This is the maximum
     #       value, and it minimizes scheduling overheads, at the expense of
@@ -109,8 +105,16 @@ module ContainedMr::JobLogic
 
     {
       'Memory' => ram_bytes, 'MemorySwap' => swap_bytes,
+      'MemorySwappiness' => 0,
       'CpuPeriod' => cpu_period,
       'CpuQuota' => (job_section[:vcpus] * cpu_period).to_i,
+      'LogConfig' => {
+        'Type' => 'json-file',
+        'Config' => {
+          'max-size' => (job_section[:logs] * 1048576).to_i.to_s,
+          'max-file' => '1',
+        },
+      },
     }
   end
   private :container_host_config
@@ -122,8 +126,9 @@ module ContainedMr::JobLogic
     @mapper_options = {
       wait_time: mapper['wait_time'] || 60,
       vcpus: mapper['vcpus'] || 1,  # logical processors
-      ram: mapper['ram'] || 512,  # megabytes
-      swap: mapper['swap'] || 0,  # megabytes
+      ram: mapper['ram'] || 512,    # megabytes
+      swap: mapper['swap'] || 0,    # megabytes
+      logs: mapper['logs'] || 64,   # megabytes
       ulimits: {
         cpu: mapper_ulimits['cpu'] || 60,  # seconds
       }
@@ -134,8 +139,9 @@ module ContainedMr::JobLogic
     @reducer_options = {
       wait_time: reducer['wait_time'] || 60,
       vcpus: reducer['vcpus'] || 1,  # logical processors
-      ram: reducer['ram'] || 512,  # megabytes
-      swap: reducer['swap'] || 0,  # megabytes
+      ram: reducer['ram'] || 512,    # megabytes
+      swap: reducer['swap'] || 0,    # megabytes
+      logs: reducer['logs'] || 64,   # megabytes
       ulimits: {
         cpu: reducer_ulimits['cpu'] || 60,
       }

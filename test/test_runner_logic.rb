@@ -16,8 +16,16 @@ class TestRunnerLogic < MiniTest::Test
       'HostConfig' => {
         'Memory' => 256.5 * 1024 * 1024,
         'MemorySwap' => (256.5 + 64) * 1024 * 1024,
+        'MemorySwappiness' => 0,
         'CpuQuota' => 1500000,
         'CpuPeriod' => 1000000,
+        'LogConfig' => {
+          'Type' => 'json-file',
+          'Config' => {
+            'max-size' => '4718592',
+            'max-file' => '1',
+          },
+        },
       },
     }
     @runner = ContainedMr::Mock::Runner.new @container_options, 2.5,

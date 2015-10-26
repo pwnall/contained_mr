@@ -23,7 +23,7 @@ brew cask install virtualbox
 Create a Docker VM. This is a one-time setup.
 
 ```bash
-docker-machine create --driver virtualbox dev
+docker-machine create --driver virtualbox --engine-storage-driver overlay dev
 ```
 
 Set up the local environment to point to the Docker daemon in the VM. This must

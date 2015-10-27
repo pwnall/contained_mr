@@ -50,7 +50,11 @@ class ContainedMr::Runner
   def destroy!(container = nil)
     unless @container_id.nil?
       container ||= Docker::Container.get @container_id
-      container.delete force: true
+      begin
+        container.delete force: true
+      rescue Docker::Error::NotFoundError
+        # Workaround for https://github.com/docker/docker/issues/14474
+      end
       @container_id = nil
     end
     self

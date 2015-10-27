@@ -68,4 +68,39 @@ class TestRunner < MiniTest::Test
                                      @template.mapper_output_path
     assert_equal runner, runner.destroy!
   end
+
+  def test_destroy_invalid_container
+    runner = ContainedMr::Runner.new @job.mapper_container_options(2), 2.5,
+                                     @template.mapper_output_path
+
+    # HACK(pwnall): This is a dirty way of getting NotFoundError, which is also
+    #               what the docker gem throws in docker#14474.
+    class <<runner
+      alias_method :old_destroy, :destroy!
+      def destroy!(container)
+        old_container_id = @container_id
+        old_destroy container
+        if container
+          @container_id = old_container_id
+          old_destroy container
+        end
+      end
+    end
+
+    assert_equal runner, runner.perform
+
+    assert_equal nil, runner.container_id, 'container still running'
+    assert_operator runner.ended_at - runner.started_at, :<, 1, 'running time'
+    assert_equal 0, runner.status_code, 'status code'
+    assert_equal false, runner.timed_out, 'timed out'
+    assert_equal "2 3\n", runner.stderr, 'Stderr: $ITEM + $ITEMS'
+    assert_equal "2\nmapper input file\nHello world!\n", runner.stdout,
+                 'Stdout: $ITEM + mapper input file + data file'
+    assert_equal "2\n", runner.output, 'Output: ITEM env variable'
+
+    assert_equal runner.ended_at - runner.started_at,
+                 runner.json_file[:ran_for]
+    assert_equal 0, runner.json_file[:exit_code]
+    assert_equal false, runner.json_file[:timed_out]
+  end
 end

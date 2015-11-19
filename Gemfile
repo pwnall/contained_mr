@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'docker-api', '>= 1.22.4', require: 'docker'
+gem 'docker-api', '>= 1.23.0', require: 'docker'
 gem 'rubyzip', '>= 1.1.7', require: 'zip'
 
 # Add dependencies to develop your gem here.
@@ -8,7 +8,7 @@ gem 'rubyzip', '>= 1.1.7', require: 'zip'
 group :development do
   gem 'bundler', '>= 1.6.1'
   gem 'jeweler', '>= 2.0.1'
-  gem 'minitest', '>= 5.8.0'
+  gem 'minitest', '>= 5.8.3'
   gem 'mocha', '>= 1.1.0'
   gem 'rdoc', '>= 4.2.0'
   gem 'simplecov', '>= 0.10.0'

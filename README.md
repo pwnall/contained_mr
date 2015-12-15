@@ -16,7 +16,8 @@ The commands below install the prerequisites on OSX using
 [Homebrew](http://brew.sh/).
 
 ```bash
-brew install brew-cask docker docker-machine
+brew install docker docker-machine
+brew tap Caskroom/cask
 brew cask install virtualbox
 ```
 

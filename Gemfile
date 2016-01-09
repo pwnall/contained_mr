@@ -1,6 +1,6 @@
 source 'https://rubygems.org'
 
-gem 'docker-api', '>= 1.23.0', require: 'docker'
+gem 'docker-api', '>= 1.24.1', require: 'docker'
 gem 'rubyzip', '>= 1.1.7', require: 'zip'
 
 # Add dependencies to develop your gem here.

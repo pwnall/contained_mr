@@ -5,6 +5,7 @@
 
 Map-Reduce where both the mappers and the reducer run inside Docker containers.
 
+
 ## Development Environment
 
 `contained-mr` requires access to a Docker Swarm daemon. The easiest way to

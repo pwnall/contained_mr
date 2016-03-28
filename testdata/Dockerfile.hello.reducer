@@ -1,4 +1,5 @@
 FROM contained_mrtests/base.hello
+ARG affinity:image=
 COPY . /usr/mrd/
 WORKDIR /
 ENTRYPOINT ["/bin/sh","/usr/mrd/reducer.sh"]

@@ -1,4 +1,5 @@
 FROM contained_mrtests/base.hello
+ARG affinity:image=
 COPY input /usr/mrd/map-input
 WORKDIR /usr/mrd
 ENTRYPOINT ["/bin/sh","/usr/mrd/mapper.sh"]

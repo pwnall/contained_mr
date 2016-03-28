@@ -6,6 +6,13 @@
 Map-Reduce where both the mappers and the reducer run inside Docker containers.
 
 
+## Prerequisites
+
+`contained-mr` requires [docker](https://github.com/docker/docker) version 1.9
+or above. If used, [docker-swarm](https://github.com/docker/swarm) must be at
+vesion 1.0 or above.
+
+
 ## Development Environment
 
 `contained-mr` requires access to a Docker Swarm daemon. The easiest way to

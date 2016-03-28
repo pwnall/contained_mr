@@ -70,6 +70,7 @@ module ContainedMr::TemplateLogic
   def job_dockerfile(job_definition, input_source)
     <<DOCKER_END
 FROM #{image_tag}
+ARG affinity:image=
 COPY #{input_source} #{job_definition['input'] || '/input'}
 WORKDIR #{job_definition['chdir'] || '/'}
 ENTRYPOINT #{JSON.dump(job_definition['cmd'] || ['/bin/sh'])}

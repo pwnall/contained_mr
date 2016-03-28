@@ -65,9 +65,11 @@ class ContainedMr::Job
     end
 
     tar_io = mapper_tar_context mapper_input
-    image = Docker::Image.build_from_tar tar_io, t: mapper_image_tag,
-                                                 forcerm: 1
-    @mapper_image_id = image.id
+    Docker::Image.build_from_tar tar_io, mapper_image_options
+
+    # NOTE: The build process returns a short image ID. We need to perform
+    #       another API call to get the canonical ID.
+    @mapper_image_id = Docker::Image.get(mapper_image_tag).id
   end
 
   # Builds the Docker image used to run this job's reducer.
@@ -82,9 +84,11 @@ class ContainedMr::Job
     end
 
     tar_io = reducer_tar_context
-    image = Docker::Image.build_from_tar tar_io, t: reducer_image_tag,
-                                                 forcerm: 1
-    @reducer_image_id = image.id
+    Docker::Image.build_from_tar tar_io, reducer_image_options
+
+    # NOTE: The build process returns a short image ID. We need to perform
+    #       another API call to get the canonical ID.
+    @reducer_image_id = Docker::Image.get(reducer_image_tag).id
   end
 
   # Runs one of the job's mappers.

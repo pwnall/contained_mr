@@ -49,6 +49,24 @@ module ContainedMr::JobLogic
     "#{@name_prefix}/reducer.#{@id}"
   end
 
+  # @return {Hash<Symbol, Object>} options passed to the Docker API when
+  #   building when building the mapper image
+  def mapper_image_options
+    {
+      t: mapper_image_tag, forcerm: 1,
+      buildargs: { 'affinity:image' => "=#{@template.image_tag}" }.to_json
+    }
+  end
+
+  # @return {Hash<Symbol, Object>} options passed to the Docker API when
+  #   building when building the mapper image
+  def reducer_image_options
+    {
+      t: reducer_image_tag, forcerm: 1,
+      buildargs: { 'affinity:image' => "=#{@template.image_tag}" }.to_json
+    }
+  end
+
   # @return {Hash<String, Object>} params used to create a mapper container
   def mapper_container_options(i)
     ulimits = @mapper_options[:ulimits].map do |k, v|

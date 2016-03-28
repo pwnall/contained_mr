@@ -23,7 +23,7 @@ class TestJob < MiniTest::Test
 
     image = Docker::Image.get @job.mapper_image_tag
     assert image, 'Docker::Image'
-    assert_operator image.id, :start_with?, @job.mapper_image_id
+    assert_equal image.id, @job.mapper_image_id
 
     1.upto 3 do |i|
       assert_nil @job.mapper_runner(i), "Mapper #{i} started prematurely"
@@ -48,8 +48,7 @@ class TestJob < MiniTest::Test
   def test_created_mapper_image_tags
     @job.build_mapper_image File.read('testdata/input.hello')
 
-    images = Docker::Image.all
-    image = images.find { |i| i.id.start_with? @job.mapper_image_id }
+    image = Docker::Image.get @job.mapper_image_id
     assert image, 'Docker::Image in collection returned by Docker::Image.all'
     assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
     assert_includes image.info['RepoTags'],
@@ -97,12 +96,11 @@ class TestJob < MiniTest::Test
     @job.build_reducer_image
     image = Docker::Image.get @job.reducer_image_tag
     assert image, 'Docker::Image'
-    assert_operator image.id, :start_with?, @job.reducer_image_id
+    assert_equal image.id, @job.reducer_image_id
 
     assert_nil @job.reducer_runner, "Reducer started prematurely"
 
-    images = Docker::Image.all
-    image = images.find { |i| i.id.start_with? @job.reducer_image_id }
+    image = Docker::Image.get @job.reducer_image_id
     assert image, 'Docker::Image in collection returned by Docker::Image.all'
     assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
     assert_includes image.info['RepoTags'],

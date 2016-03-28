@@ -17,6 +17,22 @@ class TestJobLogic < MiniTest::Test
     assert_equal 'contained_mrtests/reducer.testjob', @job.reducer_image_tag
   end
 
+  def test_mapper_image_options
+    golden = {
+      t: 'contained_mrtests/mapper.testjob', forcerm: 1,
+      buildargs: '{"affinity:image":"=contained_mrtests/base.hello"}'
+    }
+    assert_equal golden, @job.mapper_image_options
+  end
+
+  def test_reducer_image_options
+    golden = {
+      t: 'contained_mrtests/reducer.testjob', forcerm: 1,
+      buildargs: '{"affinity:image":"=contained_mrtests/base.hello"}'
+    }
+    assert_equal golden, @job.reducer_image_options
+  end
+
   def test_mapper_container_options
     assert_equal @template, @job.template
     assert_equal 'contained_mrtests', @job.name_prefix

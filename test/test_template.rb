@@ -20,8 +20,7 @@ class TestTemplate < MiniTest::Test
   end
 
   def test_created_image_tags
-    images = Docker::Image.all
-    image = images.find { |i| i.id.start_with? @template.image_id }
+    image = Docker::Image.get @template.image_id
     assert image, 'Docker::Image in collection returned by Docker::Image.all'
     assert image.info['RepoTags'], "Image missing RepoTags: #{image.inspect}"
     assert_includes image.info['RepoTags'],

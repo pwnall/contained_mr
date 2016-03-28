@@ -1,11 +1,12 @@
 sudo: required
+dist: trusty
 language: ruby
-services:
-  - docker
 rvm:
   - 2.2.4
   - 2.3.0
 before_install:
+  - sudo apt-get update
+  - sudo apt-get install -o Dpkg::Options::="--force-confold" --force-yes -y docker-engine
   - gem install bundler
 before_script:
   - bundle install --jobs=3 --retry=3 --deployment

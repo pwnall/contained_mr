@@ -1,13 +1,13 @@
 source 'https://rubygems.org'
 
-gem 'docker-api', '>= 1.26.2', require: 'docker'
-gem 'rubyzip', '>= 1.1.7', require: 'zip'
+gem 'docker-api', '>= 1.28.0', require: 'docker'
+gem 'rubyzip', '>= 1.2.0', require: 'zip'
 
 # Add dependencies to develop your gem here.
 # Include everything needed to run rake, tests, features, etc.
 group :development do
   gem 'bundler', '>= 1.6.1'
-  gem 'jeweler', '>= 2.0.1'
+  gem 'jeweler', '>= 2.1.1'
   gem 'minitest', '>= 5.8.3'
   gem 'mocha', '>= 1.1.0'
   gem 'rake', '>= 11.1.2'

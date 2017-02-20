@@ -22,13 +22,13 @@ class TestMockJob < MiniTest::Test
     assert_equal 3, @job.item_count
 
     assert_equal 2.5, @job._json_options['mapper']['wait_time']
-    assert_equal nil, @job._mapper_input
+    assert_nil @job._mapper_input
   end
 
   def test_build_mapper_image
     input = File.read('testdata/input.hello')
 
-    assert_equal nil, @job.mapper_image_id
+    assert_nil @job.mapper_image_id
     assert_equal 'mock-job-mapper-image-id', @job.build_mapper_image(input)
     assert_equal 'mock-job-mapper-image-id', @job.mapper_image_id
 
@@ -39,7 +39,7 @@ class TestMockJob < MiniTest::Test
     @job.build_mapper_image File.read('testdata/input.hello')
 
     mock_runner = @job._mock_mapper_runner 2
-    assert_equal nil, @job.mapper_runner(2)
+    assert_nil @job.mapper_runner(2)
     assert_equal mock_runner, @job.run_mapper(2)
     assert_equal mock_runner, @job.mapper_runner(2)
 
@@ -66,7 +66,7 @@ class TestMockJob < MiniTest::Test
     @job.build_mapper_image File.read('testdata/input.hello')
     1.upto(3) { |i| @job.run_mapper i }
 
-    assert_equal nil, @job.reducer_image_id
+    assert_nil @job.reducer_image_id
     assert_equal 'mock-job-reducer-image-id', @job.build_reducer_image
     assert_equal 'mock-job-reducer-image-id', @job.reducer_image_id
   end
@@ -77,7 +77,7 @@ class TestMockJob < MiniTest::Test
     @job.build_reducer_image
 
     mock_runner = @job._mock_reducer_runner
-    assert_equal nil, @job.reducer_runner
+    assert_nil @job.reducer_runner
     assert_equal mock_runner, @job.run_reducer
     assert_equal mock_runner, @job.reducer_runner
 

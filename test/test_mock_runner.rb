@@ -60,13 +60,13 @@ class TestMockRunner < MiniTest::Test
   end
 
   def test_mock_set
-    assert_equal nil, @runner.started_at
-    assert_equal nil, @runner.ended_at
-    assert_equal nil, @runner.status_code
-    assert_equal nil, @runner.timed_out
-    assert_equal nil, @runner.stdout
-    assert_equal nil, @runner.stderr
-    assert_equal nil, @runner.output
+    assert_nil @runner.started_at
+    assert_nil @runner.ended_at
+    assert_nil @runner.status_code
+    assert_nil @runner.timed_out
+    assert_nil @runner.stdout
+    assert_nil @runner.stderr
+    assert_nil @runner.output
 
     t0 = Time.now
     t1 = t0 + 42
@@ -86,7 +86,7 @@ class TestMockRunner < MiniTest::Test
   def test_ulimit
     assert_equal 3, @runner._ulimit('cpu')
     assert_equal 1000000, @runner._ulimit('rss')
-    assert_equal nil, @runner._ulimit('nothing')
+    assert_nil @runner._ulimit('nothing')
   end
 
   def test_ulimit_with_mismatched_values
@@ -108,8 +108,8 @@ class TestMockRunner < MiniTest::Test
     @container_options.delete 'Ulimits'
     runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                            '/usr/mrd/map-output'
-    assert_equal nil, runner._ulimit('cpu')
-    assert_equal nil, runner._ulimit('rss')
+    assert_nil runner._ulimit('cpu')
+    assert_nil runner._ulimit('rss')
   end
 
   def test_resources
@@ -123,18 +123,18 @@ class TestMockRunner < MiniTest::Test
     @container_options.delete 'HostConfig'
     runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                            '/usr/mrd/map-output'
-    assert_equal nil, runner._ram_limit
-    assert_equal nil, runner._swap_limit
-    assert_equal nil, runner._vcpus
-    assert_equal nil, runner._logs
+    assert_nil runner._ram_limit
+    assert_nil runner._swap_limit
+    assert_nil runner._vcpus
+    assert_nil runner._logs
   end
 
   def test_resources_without_host_config_memory
     @container_options['HostConfig'].delete 'Memory'
     runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                            '/usr/mrd/map-output'
-    assert_equal nil, runner._ram_limit
-    assert_equal nil, runner._swap_limit
+    assert_nil runner._ram_limit
+    assert_nil runner._swap_limit
     assert_equal 1, runner._vcpus
     assert_equal 4.5, runner._logs
   end
@@ -144,7 +144,7 @@ class TestMockRunner < MiniTest::Test
     runner = ContainedMr::Mock::Runner.new @container_options, 2.5,
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
-    assert_equal nil, runner._swap_limit
+    assert_nil runner._swap_limit
     assert_equal 1, runner._vcpus
     assert_equal 4.5, runner._logs
   end
@@ -155,7 +155,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
-    assert_equal nil, runner._vcpus
+    assert_nil runner._vcpus
     assert_equal 4.5, runner._logs
   end
 
@@ -165,7 +165,7 @@ class TestMockRunner < MiniTest::Test
                                            '/usr/mrd/map-output'
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
-    assert_equal nil, runner._vcpus
+    assert_nil runner._vcpus
     assert_equal 4.5, runner._logs
   end
 
@@ -176,7 +176,7 @@ class TestMockRunner < MiniTest::Test
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
     assert_equal 1, runner._vcpus
-    assert_equal nil, runner._logs
+    assert_nil runner._logs
   end
 
   def test_resources_without_host_config_log_config_config
@@ -186,7 +186,7 @@ class TestMockRunner < MiniTest::Test
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
     assert_equal 1, runner._vcpus
-    assert_equal nil, runner._logs
+    assert_nil runner._logs
   end
 
   def test_resources_without_host_config_log_config_config_max_size
@@ -196,7 +196,7 @@ class TestMockRunner < MiniTest::Test
     assert_equal 256.5, runner._ram_limit
     assert_equal 64, runner._swap_limit
     assert_equal 1, runner._vcpus
-    assert_equal nil, runner._logs
+    assert_nil runner._logs
   end
 
   def test_resources_with_zero_swap

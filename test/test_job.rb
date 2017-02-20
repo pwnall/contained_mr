@@ -17,7 +17,7 @@ class TestJob < MiniTest::Test
   def test_build_mapper_image
     assert_equal 'contained_mrtests/mapper.testjob', @job.mapper_image_tag
 
-    assert_equal nil, @job.mapper_image_id
+    assert_nil @job.mapper_image_id
     mapper_return = @job.build_mapper_image File.read('testdata/input.hello')
     assert_equal mapper_return, @job.mapper_image_id
 
@@ -40,7 +40,7 @@ class TestJob < MiniTest::Test
       @job.build_mapper_image File.read('testdata/input.hello')
     end
 
-    assert_equal nil, @job.mapper_image_id
+    assert_nil @job.mapper_image_id
     containers = Docker::Container.all(all: true)
     assert_equal old_containers.length, containers.length
   end
@@ -66,7 +66,7 @@ class TestJob < MiniTest::Test
 
     mapper = @job.mapper_runner 2
     assert mapper, 'Mapper 2 not started'
-    assert_equal nil, mapper.container_id, 'Mapper container still running'
+    assert_nil mapper.container_id, 'Mapper container still running'
     assert_equal "2 3\n", mapper.stderr, 'Stderr: $ITEM + $ITEMS'
   end
 
@@ -74,7 +74,7 @@ class TestJob < MiniTest::Test
     @job.build_mapper_image File.read('testdata/input.hello')
     mapper = @job.run_mapper 2
 
-    assert_equal nil, mapper.container_id, 'Mapper container still running'
+    assert_nil mapper.container_id, 'Mapper container still running'
     assert_equal "2\nmapper input file\nHello world!\n", mapper.stdout,
                  'Stdout: $ITEM + mapper input file + data file'
   end
@@ -83,7 +83,7 @@ class TestJob < MiniTest::Test
     @job.build_mapper_image File.read('testdata/input.hello')
     mapper = @job.run_mapper 2
 
-    assert_equal nil, mapper.container_id, 'Mapper container still running'
+    assert_nil mapper.container_id, 'Mapper container still running'
     assert_equal "2\n", mapper.output, 'Output: ITEM env variable'
   end
 
@@ -119,7 +119,7 @@ class TestJob < MiniTest::Test
       @job.build_reducer_image
     end
 
-    assert_equal nil, @job.reducer_image_id
+    assert_nil @job.reducer_image_id
     containers = Docker::Container.all(all: true)
     assert_equal old_containers.length, containers.length
   end

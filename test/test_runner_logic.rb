@@ -34,17 +34,17 @@ class TestRunnerLogic < MiniTest::Test
   end
 
   def test_ran_for_with_nil_start_end
-    assert_equal nil, @runner.ran_for
+    assert_nil @runner.ran_for
   end
 
   def test_ran_for_with_nil_end
     @runner._mock_set started_at: Time.now
-    assert_equal nil, @runner.ran_for
+    assert_nil @runner.ran_for
   end
 
   def test_ran_for_with_nil_start
     @runner._mock_set ended_at: Time.now
-    assert_equal nil, @runner.ran_for
+    assert_nil @runner.ran_for
   end
 
   def test_ran_for_with_start_and_end

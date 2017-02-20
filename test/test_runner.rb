@@ -19,7 +19,7 @@ class TestRunner < MiniTest::Test
                                      @template.mapper_output_path
     assert_equal runner, runner.perform
 
-    assert_equal nil, runner.container_id, 'container still running'
+    assert_nil runner.container_id, 'container still running'
     assert_operator runner.ended_at - runner.started_at, :<, 1, 'running time'
     assert_equal 0, runner.status_code, 'status code'
     assert_equal false, runner.timed_out, 'timed out'
@@ -39,7 +39,7 @@ class TestRunner < MiniTest::Test
                                      @template.mapper_output_path
     assert_equal runner, runner.perform
 
-    assert_equal nil, runner.container_id, 'container still running'
+    assert_nil runner.container_id, 'container still running'
     assert_operator runner.ended_at - runner.started_at, :<, 1, 'running time'
     assert_equal 42, runner.status_code, 'status code'
     assert_equal false, runner.timed_out, 'timed out'
@@ -52,7 +52,7 @@ class TestRunner < MiniTest::Test
                                      @template.mapper_output_path
     assert_equal runner, runner.perform
 
-    assert_equal nil, runner.container_id, 'container still running'
+    assert_nil runner.container_id, 'container still running'
     assert_equal false, runner.status_code, 'status code'
     assert_equal true, runner.timed_out, 'timed out'
     assert_operator runner.ended_at - runner.started_at, :>, 2.2,
@@ -89,7 +89,7 @@ class TestRunner < MiniTest::Test
 
     assert_equal runner, runner.perform
 
-    assert_equal nil, runner.container_id, 'container still running'
+    assert_nil runner.container_id, 'container still running'
     assert_operator runner.ended_at - runner.started_at, :<, 1, 'running time'
     assert_equal 0, runner.status_code, 'status code'
     assert_equal false, runner.timed_out, 'timed out'
